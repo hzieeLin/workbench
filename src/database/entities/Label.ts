@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
-import { CardLabel } from './CardLabel'
 
 @Entity('labels')
 export class Label {
@@ -12,6 +11,6 @@ export class Label {
   @Column()
   color!: string
 
-  @OneToMany(() => CardLabel, (cardLabel) => cardLabel.label)
-  cardLabels!: CardLabel[]
+  @OneToMany('CardLabel', (cardLabel: any) => cardLabel.label)
+  cardLabels!: any[]
 }

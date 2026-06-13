@@ -8,9 +8,6 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm'
-import { List } from './List'
-import { CardLabel } from './CardLabel'
-import { TimeBlock } from './TimeBlock'
 
 @Entity('cards')
 export class Card {
@@ -41,13 +38,13 @@ export class Card {
   @UpdateDateColumn()
   updated_at!: Date
 
-  @ManyToOne(() => List, (list) => list.cards)
+  @ManyToOne('List', (list: any) => list.cards)
   @JoinColumn({ name: 'list_id' })
-  list!: List
+  list!: any
 
-  @OneToMany(() => CardLabel, (cardLabel) => cardLabel.card)
-  cardLabels!: CardLabel[]
+  @OneToMany('CardLabel', (cardLabel: any) => cardLabel.card)
+  cardLabels!: any[]
 
-  @OneToMany(() => TimeBlock, (timeBlock) => timeBlock.card)
-  timeBlocks!: TimeBlock[]
+  @OneToMany('TimeBlock', (timeBlock: any) => timeBlock.card)
+  timeBlocks!: any[]
 }

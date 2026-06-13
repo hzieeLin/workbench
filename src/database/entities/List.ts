@@ -7,8 +7,6 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm'
-import { Board } from './Board'
-import { Card } from './Card'
 
 @Entity('lists')
 export class List {
@@ -27,10 +25,10 @@ export class List {
   @CreateDateColumn()
   created_at!: Date
 
-  @ManyToOne(() => Board, (board) => board.lists)
+  @ManyToOne('Board', (board: any) => board.lists)
   @JoinColumn({ name: 'board_id' })
-  board!: Board
+  board!: any
 
-  @OneToMany(() => Card, (card) => card.list)
-  cards!: Card[]
+  @OneToMany('Card', (card: any) => card.list)
+  cards!: any[]
 }

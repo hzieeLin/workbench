@@ -6,7 +6,6 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm'
-import { List } from './List'
 
 @Entity('boards')
 export class Board {
@@ -25,6 +24,6 @@ export class Board {
   @UpdateDateColumn()
   updated_at!: Date
 
-  @OneToMany(() => List, (list) => list.board)
-  lists!: List[]
+  @OneToMany('List', (list: any) => list.board)
+  lists!: any[]
 }

@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm'
-import { Card } from './Card'
 
 @Entity('time_blocks')
 export class TimeBlock {
@@ -18,7 +17,7 @@ export class TimeBlock {
   @Column()
   title!: string
 
-  @ManyToOne(() => Card, (card) => card.timeBlocks, { nullable: true })
+  @ManyToOne('Card', (card: any) => card.timeBlocks, { nullable: true })
   @JoinColumn({ name: 'card_id' })
-  card?: Card
+  card?: any
 }
