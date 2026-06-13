@@ -6,6 +6,9 @@
 
 <script setup lang="ts">
 import AppLayout from './components/layout/AppLayout.vue'
+import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
+
+useKeyboardShortcuts()
 </script>
 
 <style>
