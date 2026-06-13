@@ -16,7 +16,7 @@ const currentDate = computed(() => {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    weekday: 'long'
+    weekday: 'long',
   })
 })
 
