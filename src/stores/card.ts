@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { In } from 'typeorm'
 import { AppDataSource } from '@/database/connection'
 import { Card } from '@/database/entities/Card'
 import { List } from '@/database/entities/List'
@@ -39,7 +40,7 @@ export const useCardStore = defineStore('card', () => {
       const listIds = lists.map((l) => l.id)
       if (listIds.length > 0) {
         cards.value = await cardRepo.find({
-          where: { list_id: listIds } as any,
+          where: { list_id: In(listIds) },
           order: { list_id: 'ASC', position: 'ASC' },
         })
       } else {
