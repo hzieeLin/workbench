@@ -10,28 +10,80 @@ import { CalendarEvent } from './entities/CalendarEvent'
 import { ActivityLog } from './entities/ActivityLog'
 import { InitialSchema1710000000000 } from './migrations/InitialSchema'
 
-export const AppDataSource = new DataSource({
-  type: 'mysql',
-  host: process.env.DB_HOST ?? 'localhost',
-  port: Number(process.env.DB_PORT) || 3306,
-  username: process.env.DB_USERNAME ?? 'root',
-  password: process.env.DB_PASSWORD ?? '',
-  database: process.env.DB_DATABASE ?? 'task_orchestrator',
-  synchronize: false,
-  logging: false,
-  entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog],
-  migrations: [InitialSchema1710000000000],
-  subscribers: [],
-})
+const isBrowser = typeof window !== 'undefined'
+
+let _dataSource: DataSource | null = null
+
+function createBrowserStubDataSource() {
+  const stubRepo: any = {
+    find: async () => [],
+    findOne: async () => null,
+    save: async (e: any) => e,
+    create: (d: any) => d,
+    delete: async () => undefined,
+    update: async () => undefined,
+    count: async () => 0,
+  }
+  return {
+    isInitialized: true,
+    getRepository: () => stubRepo,
+    initialize: async () => undefined,
+    runMigrations: async () => undefined,
+  }
+}
+
+export const AppDataSource: any = isBrowser
+  ? createBrowserStubDataSource()
+  : new Proxy({} as DataSource, {
+      get(_target, prop) {
+        if (_dataSource) return (_dataSource as any)[prop]
+        if (prop === 'getRepository') {
+          return () => {
+            throw new Error('Database not initialized. Call initializeDatabase() first.')
+          }
+        }
+        if (prop === 'isInitialized') return false
+        return undefined
+      },
+    })
+
+export function getDataSource(): DataSource {
+  if (_dataSource) return _dataSource
+
+  if (isBrowser) {
+    throw new Error('Database cannot be accessed from browser. Use IPC to communicate with main process.')
+  }
+
+  const env = typeof process !== 'undefined' ? process.env : {}
+
+  _dataSource = new DataSource({
+    type: 'mysql',
+    host: env.DB_HOST ?? 'localhost',
+    port: Number(env.DB_PORT) || 3306,
+    username: env.DB_USERNAME ?? 'root',
+    password: env.DB_PASSWORD ?? '',
+    database: env.DB_DATABASE ?? 'task_orchestrator',
+    synchronize: false,
+    logging: false,
+    entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog],
+    migrations: [InitialSchema1710000000000],
+    subscribers: [],
+  })
+
+  return _dataSource
+}
 
 export async function initializeDatabase() {
+  const dataSource = getDataSource()
   try {
-    await AppDataSource.initialize()
+    await dataSource.initialize()
     console.log('Database connection established')
-    await AppDataSource.runMigrations()
+    await dataSource.runMigrations()
     console.log('Migrations executed successfully')
   } catch (error) {
     console.error('Database connection failed:', error)
     throw error
   }
 }
+
+export { Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog }

@@ -1,29 +1,22 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { useBoardStore } from '@/stores/board'
-import { AppDataSource } from '@/database/connection'
+import { db } from '@/database/db'
 
-jest.mock('@/database/connection', () => ({
-  AppDataSource: {
-    getRepository: jest.fn().mockReturnValue({
-      find: jest.fn().mockResolvedValue([]),
+jest.mock('@/database/db', () => ({
+  db: {
+    boards: {
+      find: jest.fn().mockReturnValue([]),
       create: jest.fn().mockImplementation((data) => ({
         id: 1,
         name: data.name,
         description: data.description,
         created_at: new Date(),
         updated_at: new Date(),
+        lists: [],
       })),
-      save: jest.fn().mockImplementation((entity) =>
-        Promise.resolve({
-          ...entity,
-          id: 1,
-          created_at: new Date(),
-          updated_at: new Date(),
-        })
-      ),
       update: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
-    }),
+    },
   },
 }))
 
@@ -72,11 +65,11 @@ describe('Board Store', () => {
 
   it('fetches boards successfully', async () => {
     const mockBoards = [
-      { id: 1, name: 'Board 1', created_at: new Date(), updated_at: new Date() },
-      { id: 2, name: 'Board 2', created_at: new Date(), updated_at: new Date() },
+      { id: 1, name: 'Board 1', created_at: new Date(), updated_at: new Date(), lists: [] },
+      { id: 2, name: 'Board 2', created_at: new Date(), updated_at: new Date(), lists: [] },
     ]
-    const mockRepo = AppDataSource.getRepository as jest.Mock
-    mockRepo().find.mockResolvedValue(mockBoards)
+    const find = db.boards.find as jest.Mock
+    find.mockReturnValue(mockBoards)
 
     const store = useBoardStore()
     await store.fetchBoards()
@@ -87,8 +80,10 @@ describe('Board Store', () => {
   })
 
   it('handles fetch boards error', async () => {
-    const mockRepo = AppDataSource.getRepository as jest.Mock
-    mockRepo().find.mockRejectedValue(new Error('Database error'))
+    const find = db.boards.find as jest.Mock
+    find.mockImplementation(() => {
+      throw new Error('Database error')
+    })
 
     const store = useBoardStore()
     await store.fetchBoards()

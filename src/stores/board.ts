@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { AppDataSource } from '@/database/connection'
-import { Board } from '@/database/entities/Board'
+import { db } from '@/database/db'
+import type { Board } from '@/database/entities/Board'
 
 export const useBoardStore = defineStore('board', () => {
   const boards = ref<Board[]>([])
@@ -11,74 +11,28 @@ export const useBoardStore = defineStore('board', () => {
 
   async function fetchBoards() {
     loading.value = true
-    error.value = null
-    try {
-      const boardRepo = AppDataSource.getRepository(Board)
-      boards.value = await boardRepo.find({ order: { created_at: 'DESC' } })
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-    } finally {
-      loading.value = false
-    }
+    try { boards.value = db.boards.find() } catch (e: any) { error.value = e.message } finally { loading.value = false }
   }
 
   async function createBoard(name: string, description?: string) {
-    error.value = null
-    try {
-      const boardRepo = AppDataSource.getRepository(Board)
-      const board = boardRepo.create({ name, description })
-      const saved = await boardRepo.save(board)
-      boards.value.unshift(saved)
-      return saved
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
-    }
+    const board = db.boards.create({ name, description })
+    boards.value.unshift(board)
+    return board
   }
 
   async function updateBoard(id: number, data: Partial<Board>) {
-    error.value = null
-    try {
-      const boardRepo = AppDataSource.getRepository(Board)
-      await boardRepo.update(id, data)
-      const index = boards.value.findIndex((b) => b.id === id)
-      if (index !== -1) {
-        boards.value[index] = { ...boards.value[index], ...data }
-      }
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
-    }
+    await db.boards.update(id, data)
+    const i = boards.value.findIndex(b => b.id === id)
+    if (i !== -1) boards.value[i] = { ...boards.value[i], ...data }
   }
 
   async function deleteBoard(id: number) {
-    error.value = null
-    try {
-      const boardRepo = AppDataSource.getRepository(Board)
-      await boardRepo.delete(id)
-      boards.value = boards.value.filter((b) => b.id !== id)
-      if (currentBoard.value?.id === id) {
-        currentBoard.value = null
-      }
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
-    }
+    await db.boards.delete(id)
+    boards.value = boards.value.filter(b => b.id !== id)
+    if (currentBoard.value?.id === id) currentBoard.value = null
   }
 
-  function setCurrentBoard(board: Board | null) {
-    currentBoard.value = board
-  }
+  function setCurrentBoard(board: Board | null) { currentBoard.value = board }
 
-  return {
-    boards,
-    currentBoard,
-    loading,
-    error,
-    fetchBoards,
-    createBoard,
-    updateBoard,
-    deleteBoard,
-    setCurrentBoard,
-  }
+  return { boards, currentBoard, loading, error, fetchBoards, createBoard, updateBoard, deleteBoard, setCurrentBoard }
 })

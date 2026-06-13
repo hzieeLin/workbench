@@ -36,7 +36,7 @@ export const useCardStore = defineStore('card', () => {
     try {
       const cardRepo = AppDataSource.getRepository(Card)
       const listRepo = AppDataSource.getRepository(List)
-      const lists = await listRepo.find({ where: { board_id: boardId } })
+      const lists: List[] = await listRepo.find({ where: { board_id: boardId } })
       const listIds = lists.map((l) => l.id)
       if (listIds.length > 0) {
         cards.value = await cardRepo.find({

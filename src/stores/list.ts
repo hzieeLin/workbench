@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { AppDataSource } from '@/database/connection'
-import { List } from '@/database/entities/List'
+import { db } from '@/database/db'
+import type { List } from '@/database/entities/List'
 
 export const useListStore = defineStore('list', () => {
   const lists = ref<List[]>([])
@@ -10,83 +10,33 @@ export const useListStore = defineStore('list', () => {
 
   async function fetchLists(boardId: number) {
     loading.value = true
-    error.value = null
-    try {
-      const listRepo = AppDataSource.getRepository(List)
-      lists.value = await listRepo.find({
-        where: { board_id: boardId },
-        order: { position: 'ASC' },
-      })
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-    } finally {
-      loading.value = false
-    }
+    try { lists.value = db.lists.find(boardId) } catch (e: any) { error.value = e.message } finally { loading.value = false }
   }
 
   async function createList(boardId: number, name: string) {
-    error.value = null
-    try {
-      const listRepo = AppDataSource.getRepository(List)
-      const maxPosition =
-        lists.value.length > 0 ? Math.max(...lists.value.map((l) => l.position)) : 0
-      const list = listRepo.create({ board_id: boardId, name, position: maxPosition + 1 })
-      const saved = await listRepo.save(list)
-      lists.value.push(saved)
-      return saved
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
-    }
+    const maxPos = lists.value.length > 0 ? Math.max(...lists.value.map(l => l.position)) : 0
+    const list = db.lists.create({ board_id: boardId, name, position: maxPos + 1 })
+    lists.value.push(list)
+    return list
   }
 
   async function updateList(id: number, data: Partial<List>) {
-    error.value = null
-    try {
-      const listRepo = AppDataSource.getRepository(List)
-      await listRepo.update(id, data)
-      const index = lists.value.findIndex((l) => l.id === id)
-      if (index !== -1) {
-        lists.value[index] = { ...lists.value[index], ...data }
-      }
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
-    }
+    await db.lists.update(id, data)
+    const i = lists.value.findIndex(l => l.id === id)
+    if (i !== -1) lists.value[i] = { ...lists.value[i], ...data }
   }
 
   async function deleteList(id: number) {
-    error.value = null
-    try {
-      const listRepo = AppDataSource.getRepository(List)
-      await listRepo.delete(id)
-      lists.value = lists.value.filter((l) => l.id !== id)
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
-    }
+    await db.lists.delete(id)
+    lists.value = lists.value.filter(l => l.id !== id)
   }
 
   async function reorderLists(boardId: number, listIds: number[]) {
-    error.value = null
-    try {
-      const listRepo = AppDataSource.getRepository(List)
-      await Promise.all(listIds.map((id, i) => listRepo.update(id, { position: i + 1 })))
-      await fetchLists(boardId)
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-      throw e
+    for (let i = 0; i < listIds.length; i++) {
+      await db.lists.update(listIds[i], { position: i + 1 })
     }
+    await fetchLists(boardId)
   }
 
-  return {
-    lists,
-    loading,
-    error,
-    fetchLists,
-    createList,
-    updateList,
-    deleteList,
-    reorderLists,
-  }
+  return { lists, loading, error, fetchLists, createList, updateList, deleteList, reorderLists }
 })
