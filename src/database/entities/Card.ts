@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm'
 import { List } from './List'
 import { CardLabel } from './CardLabel'
@@ -22,7 +23,7 @@ export class Card {
   @Column()
   title!: string
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   description?: string
 
   @Column({ type: 'enum', enum: ['low', 'medium', 'high'], default: 'medium' })
@@ -41,6 +42,7 @@ export class Card {
   updated_at!: Date
 
   @ManyToOne(() => List, (list) => list.cards)
+  @JoinColumn({ name: 'list_id' })
   list!: List
 
   @OneToMany(() => CardLabel, (cardLabel) => cardLabel.card)

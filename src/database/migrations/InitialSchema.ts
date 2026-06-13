@@ -8,7 +8,7 @@ export class InitialSchema1710000000000 implements MigrationInterface {
       CREATE TABLE boards (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        description VARCHAR(255),
+        description TEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
@@ -24,13 +24,14 @@ export class InitialSchema1710000000000 implements MigrationInterface {
         FOREIGN KEY (board_id) REFERENCES boards(id)
       )
     `)
+    await queryRunner.query(`CREATE INDEX idx_lists_board_id ON lists(board_id)`)
 
     await queryRunner.query(`
       CREATE TABLE cards (
         id INT AUTO_INCREMENT PRIMARY KEY,
         list_id INT NOT NULL,
         title VARCHAR(255) NOT NULL,
-        description VARCHAR(255),
+        description TEXT DEFAULT NULL,
         priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
         due_date DATETIME,
         position INT NOT NULL,
@@ -39,6 +40,7 @@ export class InitialSchema1710000000000 implements MigrationInterface {
         FOREIGN KEY (list_id) REFERENCES lists(id)
       )
     `)
+    await queryRunner.query(`CREATE INDEX idx_cards_list_id ON cards(list_id)`)
 
     await queryRunner.query(`
       CREATE TABLE labels (
@@ -57,6 +59,8 @@ export class InitialSchema1710000000000 implements MigrationInterface {
         FOREIGN KEY (label_id) REFERENCES labels(id)
       )
     `)
+    await queryRunner.query(`CREATE INDEX idx_card_labels_card_id ON card_labels(card_id)`)
+    await queryRunner.query(`CREATE INDEX idx_card_labels_label_id ON card_labels(label_id)`)
 
     await queryRunner.query(`
       CREATE TABLE time_blocks (
@@ -68,6 +72,7 @@ export class InitialSchema1710000000000 implements MigrationInterface {
         FOREIGN KEY (card_id) REFERENCES cards(id)
       )
     `)
+    await queryRunner.query(`CREATE INDEX idx_time_blocks_card_id ON time_blocks(card_id)`)
 
     await queryRunner.query(`
       CREATE TABLE calendar_events (
@@ -75,7 +80,7 @@ export class InitialSchema1710000000000 implements MigrationInterface {
         title VARCHAR(255) NOT NULL,
         start_time DATETIME NOT NULL,
         end_time DATETIME NOT NULL,
-        description VARCHAR(255)
+        description TEXT DEFAULT NULL
       )
     `)
 
@@ -84,9 +89,11 @@ export class InitialSchema1710000000000 implements MigrationInterface {
         id INT AUTO_INCREMENT PRIMARY KEY,
         card_id INT NOT NULL,
         action ENUM('created', 'updated', 'completed', 'deleted') NOT NULL,
-        timestamp DATETIME NOT NULL
+        timestamp DATETIME NOT NULL,
+        FOREIGN KEY (card_id) REFERENCES cards(id)
       )
     `)
+    await queryRunner.query(`CREATE INDEX idx_activity_logs_card_id ON activity_logs(card_id)`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

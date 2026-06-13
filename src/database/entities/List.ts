@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm'
 import { Board } from './Board'
 import { Card } from './Card'
@@ -27,6 +28,7 @@ export class List {
   created_at!: Date
 
   @ManyToOne(() => Board, (board) => board.lists)
+  @JoinColumn({ name: 'board_id' })
   board!: Board
 
   @OneToMany(() => Card, (card) => card.list)

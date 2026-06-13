@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm'
 import { Card } from './Card'
 import { Label } from './Label'
 
@@ -14,8 +14,10 @@ export class CardLabel {
   label_id!: number
 
   @ManyToOne(() => Card, (card) => card.cardLabels)
+  @JoinColumn({ name: 'card_id' })
   card!: Card
 
   @ManyToOne(() => Label, (label) => label.cardLabels)
+  @JoinColumn({ name: 'label_id' })
   label!: Label
 }

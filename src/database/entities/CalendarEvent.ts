@@ -14,6 +14,6 @@ export class CalendarEvent {
   @Column({ type: 'datetime' })
   end_time!: Date
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   description?: string
 }
