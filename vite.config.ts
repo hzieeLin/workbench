@@ -13,5 +13,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rolldownOptions: {
+      external: ['expo-sqlite', 'react-native'],
+    },
   },
 })
