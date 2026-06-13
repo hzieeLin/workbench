@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { AppDataSource } from '@/database/connection'
 import { Card } from '@/database/entities/Card'
+import { List } from '@/database/entities/List'
 
 export const useCardStore = defineStore('card', () => {
   const cards = ref<Card[]>([])
@@ -13,10 +14,37 @@ export const useCardStore = defineStore('card', () => {
     error.value = null
     try {
       const cardRepo = AppDataSource.getRepository(Card)
-      cards.value = await cardRepo.find({
+      const listCards = await cardRepo.find({
         where: { list_id: listId },
         order: { position: 'ASC' },
       })
+      const otherCards = cards.value.filter((c) => c.list_id !== listId)
+      cards.value = [...otherCards, ...listCards].sort(
+        (a, b) => a.list_id - b.list_id || a.position - b.position
+      )
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : String(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchCardsByBoard(boardId: number) {
+    loading.value = true
+    error.value = null
+    try {
+      const cardRepo = AppDataSource.getRepository(Card)
+      const listRepo = AppDataSource.getRepository(List)
+      const lists = await listRepo.find({ where: { board_id: boardId } })
+      const listIds = lists.map((l) => l.id)
+      if (listIds.length > 0) {
+        cards.value = await cardRepo.find({
+          where: { list_id: listIds } as any,
+          order: { list_id: 'ASC', position: 'ASC' },
+        })
+      } else {
+        cards.value = []
+      }
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
     } finally {
@@ -84,7 +112,8 @@ export const useCardStore = defineStore('card', () => {
           .filter((c) => c.list_id === targetListId && c.id !== cardId)
           .sort((a, b) => a.position - b.position)
 
-        listCards.splice(position - 1, 0, { ...card!, id: cardId })
+        const clampedPosition = Math.max(1, Math.min(position, listCards.length + 1))
+        listCards.splice(clampedPosition - 1, 0, { ...card!, id: cardId })
 
         await Promise.all(listCards.map((c, i) => cardRepo.update(c.id, { position: i + 1 })))
 
@@ -106,17 +135,18 @@ export const useCardStore = defineStore('card', () => {
           .filter((c) => c.list_id === targetListId && c.id !== cardId)
           .sort((a, b) => a.position - b.position)
 
-        targetCards.splice(position - 1, 0, { ...card!, id: cardId } as Card)
+        const clampedPosition = Math.max(1, Math.min(position, targetCards.length + 1))
+        targetCards.splice(clampedPosition - 1, 0, { ...card!, id: cardId } as Card)
 
         await Promise.all([
-          cardRepo.update(cardId, { list_id: targetListId, position }),
+          cardRepo.update(cardId, { list_id: targetListId, position: clampedPosition }),
           ...sourceCards.map((c, i) => cardRepo.update(c.id, { position: i + 1 })),
           ...targetCards.map((c, i) => cardRepo.update(c.id, { position: i + 1 })),
         ])
 
         if (card) {
           card.list_id = targetListId
-          card.position = position
+          card.position = clampedPosition
         }
 
         sourceCards.forEach((c, i) => {
@@ -147,6 +177,7 @@ export const useCardStore = defineStore('card', () => {
     loading,
     error,
     fetchCards,
+    fetchCardsByBoard,
     createCard,
     updateCard,
     deleteCard,
