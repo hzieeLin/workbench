@@ -8,7 +8,7 @@
         v-for="day in calendarDays"
         :key="day.date.toISOString()"
         class="day-cell"
-        :class="{ 'other-month': !day.isCurrentMonth, 'today': day.isToday }"
+        :class="{ 'other-month': !day.isCurrentMonth, today: day.isToday }"
         @click="$emit('select-date', day.date)"
       >
         <span class="day-number">{{ day.date.getDate() }}</span>
@@ -61,7 +61,7 @@ const calendarDays = computed(() => {
     days.push({
       date,
       isCurrentMonth: date.getMonth() === month,
-      isToday: date.toDateString() === today.toDateString()
+      isToday: date.toDateString() === today.toDateString(),
     })
   }
 
@@ -69,7 +69,7 @@ const calendarDays = computed(() => {
 })
 
 function getBlocksForDay(date: Date): TimeBlock[] {
-  return props.timeBlocks.filter(block => {
+  return props.timeBlocks.filter((block) => {
     const blockDate = new Date(block.start_time)
     return blockDate.toDateString() === date.toDateString()
   })

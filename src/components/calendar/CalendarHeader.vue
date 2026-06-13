@@ -10,22 +10,13 @@
     </div>
     <div class="header-right">
       <div class="view-toggle">
-        <button
-          :class="{ active: viewMode === 'month' }"
-          @click="$emit('change-view', 'month')"
-        >
+        <button :class="{ active: viewMode === 'month' }" @click="$emit('change-view', 'month')">
           月
         </button>
-        <button
-          :class="{ active: viewMode === 'week' }"
-          @click="$emit('change-view', 'week')"
-        >
+        <button :class="{ active: viewMode === 'week' }" @click="$emit('change-view', 'week')">
           周
         </button>
-        <button
-          :class="{ active: viewMode === 'day' }"
-          @click="$emit('change-view', 'day')"
-        >
+        <button :class="{ active: viewMode === 'day' }" @click="$emit('change-view', 'day')">
           日
         </button>
       </div>

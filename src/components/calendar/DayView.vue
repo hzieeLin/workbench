@@ -1,17 +1,10 @@
 <template>
   <div class="day-view">
     <div class="time-column">
-      <div v-for="hour in hours" :key="hour" class="hour-label">
-        {{ hour }}:00
-      </div>
+      <div v-for="hour in hours" :key="hour" class="hour-label">{{ hour }}:00</div>
     </div>
     <div class="events-column">
-      <div
-        v-for="hour in hours"
-        :key="hour"
-        class="time-slot"
-        @click="handleSlotClick(hour)"
-      >
+      <div v-for="hour in hours" :key="hour" class="time-slot" @click="handleSlotClick(hour)">
         <div
           v-for="block in getBlocksForHour(hour)"
           :key="block.id"
@@ -40,9 +33,12 @@ const emit = defineEmits<{
 const hours = Array.from({ length: 24 }, (_, i) => i)
 
 function getBlocksForHour(hour: number): TimeBlock[] {
-  return props.timeBlocks.filter(block => {
+  return props.timeBlocks.filter((block) => {
     const blockStart = new Date(block.start_time)
-    return blockStart.toDateString() === props.currentDate.toDateString() && blockStart.getHours() === hour
+    return (
+      blockStart.toDateString() === props.currentDate.toDateString() &&
+      blockStart.getHours() === hour
+    )
   })
 }
 

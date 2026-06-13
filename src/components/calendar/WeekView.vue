@@ -1,9 +1,7 @@
 <template>
   <div class="week-view">
     <div class="time-column">
-      <div v-for="hour in hours" :key="hour" class="hour-label">
-        {{ hour }}:00
-      </div>
+      <div v-for="hour in hours" :key="hour" class="hour-label">{{ hour }}:00</div>
     </div>
     <div class="days-column">
       <div v-for="day in weekDays" :key="day.toISOString()" class="day-column">
@@ -55,7 +53,7 @@ const weekDays = computed(() => {
 })
 
 function getBlocksForHour(day: Date, hour: number): TimeBlock[] {
-  return props.timeBlocks.filter(block => {
+  return props.timeBlocks.filter((block) => {
     const blockStart = new Date(block.start_time)
     return blockStart.toDateString() === day.toDateString() && blockStart.getHours() === hour
   })

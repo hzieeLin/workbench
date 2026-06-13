@@ -50,7 +50,7 @@ async function handleSubmit() {
   await timeBlockStore.createTimeBlock({
     title: title.value,
     start_time: new Date(startTime.value),
-    end_time: new Date(endTime.value)
+    end_time: new Date(endTime.value),
   })
   emit('close')
 }
@@ -113,7 +113,7 @@ async function handleSubmit() {
   cursor: pointer;
 }
 
-.modal-actions button[type="submit"] {
+.modal-actions button[type='submit'] {
   background: #4a90d9;
   color: white;
   border: none;
