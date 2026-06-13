@@ -32,6 +32,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
     },
   })
   const loading = ref(false)
+  const error = ref<string | null>(null)
 
   const completionRate = computed(() => {
     if (stats.value.totalCards === 0) return 0
@@ -40,6 +41,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
 
   async function fetchStats() {
     loading.value = true
+    error.value = null
     try {
       const boardRepo = AppDataSource.getRepository(Board)
       const listRepo = AppDataSource.getRepository(List)
@@ -69,6 +71,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
         overdueCards,
         cardsByPriority,
       }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : String(e)
     } finally {
       loading.value = false
     }
@@ -77,6 +81,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
   return {
     stats,
     loading,
+    error,
     completionRate,
     fetchStats,
   }
