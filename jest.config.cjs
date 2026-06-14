@@ -13,6 +13,10 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  testMatch: ['**/tests/unit/**/*.test.ts', '**/tests/components/**/*.test.ts'],
+  testMatch: [
+    '**/tests/unit/**/*.test.ts',
+    '**/tests/components/**/*.test.ts',
+    '**/tests/server/**/*.test.ts',
+  ],
   moduleFileExtensions: ['ts', 'js', 'vue', 'json'],
 }
