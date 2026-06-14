@@ -1,22 +1,13 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { useBoardStore } from '@/stores/board'
-import { db } from '@/database/db'
+import { apiClient } from '@/services/api'
 
-jest.mock('@/database/db', () => ({
-  db: {
-    boards: {
-      find: jest.fn().mockReturnValue([]),
-      create: jest.fn().mockImplementation((data) => ({
-        id: 1,
-        name: data.name,
-        description: data.description,
-        created_at: new Date(),
-        updated_at: new Date(),
-        lists: [],
-      })),
-      update: jest.fn().mockResolvedValue(undefined),
-      delete: jest.fn().mockResolvedValue(undefined),
-    },
+jest.mock('@/services/api', () => ({
+  apiClient: {
+    get: jest.fn(),
+    post: jest.fn(),
+    patch: jest.fn(),
+    delete: jest.fn(),
   },
 }))
 
@@ -68,37 +59,47 @@ describe('Board Store', () => {
       { id: 1, name: 'Board 1', created_at: new Date(), updated_at: new Date(), lists: [] },
       { id: 2, name: 'Board 2', created_at: new Date(), updated_at: new Date(), lists: [] },
     ]
-    const find = db.boards.find as jest.Mock
-    find.mockReturnValue(mockBoards)
+    ;(apiClient.get as jest.Mock).mockResolvedValue(mockBoards)
 
     const store = useBoardStore()
     await store.fetchBoards()
 
+    expect(apiClient.get).toHaveBeenCalledWith('/boards')
     expect(store.boards).toEqual(mockBoards)
     expect(store.loading).toBe(false)
     expect(store.error).toBeNull()
   })
 
   it('handles fetch boards error', async () => {
-    const find = db.boards.find as jest.Mock
-    find.mockImplementation(() => {
-      throw new Error('Database error')
-    })
+    ;(apiClient.get as jest.Mock).mockRejectedValue(new Error('API error'))
 
     const store = useBoardStore()
     await store.fetchBoards()
 
     expect(store.boards).toEqual([])
-    expect(store.error).toBe('Database error')
+    expect(store.error).toBe('API error')
     expect(store.loading).toBe(false)
   })
 
   it('creates a board successfully', async () => {
-    const store = useBoardStore()
-    const newBoard = await store.createBoard('New Board', 'Description')
+    const newBoard = {
+      id: 1,
+      name: 'New Board',
+      description: 'Description',
+      created_at: new Date(),
+      updated_at: new Date(),
+      lists: [],
+    }
+    ;(apiClient.post as jest.Mock).mockResolvedValue(newBoard)
 
-    expect(newBoard).toBeDefined()
-    expect(newBoard.name).toBe('New Board')
+    const store = useBoardStore()
+    const result = await store.createBoard('New Board', 'Description')
+
+    expect(apiClient.post).toHaveBeenCalledWith('/boards', {
+      name: 'New Board',
+      description: 'Description',
+    })
+    expect(result).toEqual(newBoard)
     expect(store.boards).toContainEqual(newBoard)
   })
 
@@ -108,6 +109,7 @@ describe('Board Store', () => {
 
     await store.updateBoard(1, { name: 'New Name' })
 
+    expect(apiClient.patch).toHaveBeenCalledWith('/boards/1', { name: 'New Name' })
     expect(store.boards[0].name).toBe('New Name')
   })
 
@@ -119,6 +121,7 @@ describe('Board Store', () => {
 
     await store.deleteBoard(1)
 
+    expect(apiClient.delete).toHaveBeenCalledWith('/boards/1')
     expect(store.boards).toEqual([])
   })
 

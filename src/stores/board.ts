@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { db } from '@/database/db'
 import type { Board } from '@/database/entities/Board'
+import { apiClient } from '@/services/api'
 
 export const useBoardStore = defineStore('board', () => {
   const boards = ref<Board[]>([])
@@ -11,23 +11,30 @@ export const useBoardStore = defineStore('board', () => {
 
   async function fetchBoards() {
     loading.value = true
-    try { boards.value = db.boards.find() } catch (e: any) { error.value = e.message } finally { loading.value = false }
+    error.value = null
+    try {
+      boards.value = await apiClient.get<Board[]>('/boards')
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : String(e)
+    } finally {
+      loading.value = false
+    }
   }
 
   async function createBoard(name: string, description?: string) {
-    const board = db.boards.create({ name, description })
+    const board = await apiClient.post<Board>('/boards', { name, description })
     boards.value.unshift(board)
     return board
   }
 
   async function updateBoard(id: number, data: Partial<Board>) {
-    await db.boards.update(id, data)
+    await apiClient.patch(`/boards/${id}`, data as Record<string, unknown>)
     const i = boards.value.findIndex(b => b.id === id)
     if (i !== -1) boards.value[i] = { ...boards.value[i], ...data }
   }
 
   async function deleteBoard(id: number) {
-    await db.boards.delete(id)
+    await apiClient.delete(`/boards/${id}`)
     boards.value = boards.value.filter(b => b.id !== id)
     if (currentBoard.value?.id === id) currentBoard.value = null
   }

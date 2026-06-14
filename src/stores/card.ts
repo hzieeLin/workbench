@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { db } from '@/database/db'
 import type { Card } from '@/database/entities/Card'
+import type { List } from '@/database/entities/List'
+import { apiClient } from '@/services/api'
 
 export const useCardStore = defineStore('card', () => {
   const cards = ref<Card[]>([])
@@ -12,7 +13,7 @@ export const useCardStore = defineStore('card', () => {
     loading.value = true
     error.value = null
     try {
-      const listCards = db.cards.find(listId)
+      const listCards = await apiClient.get<Card[]>(`/lists/${listId}/cards`)
       const otherCards = cards.value.filter((c) => c.list_id !== listId)
       cards.value = [...otherCards, ...listCards].sort(
         (a, b) => a.list_id - b.list_id || a.position - b.position
@@ -28,12 +29,12 @@ export const useCardStore = defineStore('card', () => {
     loading.value = true
     error.value = null
     try {
-      const lists = db.lists.find(boardId)
-      const listIds = new Set(lists.map((list) => list.id))
-      cards.value = db
-        .cards
-        .find()
-        .filter((card) => listIds.has(card.list_id))
+      const lists = await apiClient.get<List[]>(`/boards/${boardId}/lists`)
+      const cardGroups = await Promise.all(
+        lists.map((list) => apiClient.get<Card[]>(`/lists/${list.id}/cards`))
+      )
+      cards.value = cardGroups
+        .flat()
         .sort((a, b) => a.list_id - b.list_id || a.position - b.position)
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
@@ -45,13 +46,9 @@ export const useCardStore = defineStore('card', () => {
   async function createCard(listId: number, title: string, description?: string) {
     error.value = null
     try {
-      const listCards = cards.value.filter((c) => c.list_id === listId)
-      const maxPosition = listCards.length > 0 ? Math.max(...listCards.map((c) => c.position)) : 0
-      const card = db.cards.create({
-        list_id: listId,
+      const card = await apiClient.post<Card>(`/lists/${listId}/cards`, {
         title,
         description,
-        position: maxPosition + 1,
       })
       cards.value.push(card)
       cards.value = [...cards.value].sort((a, b) => a.list_id - b.list_id || a.position - b.position)
@@ -65,7 +62,7 @@ export const useCardStore = defineStore('card', () => {
   async function updateCard(id: number, data: Partial<Card>) {
     error.value = null
     try {
-      await db.cards.update(id, data)
+      await apiClient.patch(`/cards/${id}`, data as Record<string, unknown>)
       const index = cards.value.findIndex((c) => c.id === id)
       if (index !== -1) {
         cards.value[index] = { ...cards.value[index], ...data }
@@ -79,7 +76,7 @@ export const useCardStore = defineStore('card', () => {
   async function deleteCard(id: number) {
     error.value = null
     try {
-      await db.cards.delete(id)
+      await apiClient.delete(`/cards/${id}`)
       cards.value = cards.value.filter((c) => c.id !== id)
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
@@ -90,8 +87,12 @@ export const useCardStore = defineStore('card', () => {
   async function moveCard(cardId: number, targetListId: number, position: number) {
     error.value = null
     try {
-      await db.cards.moveCard(cardId, targetListId, position)
-      cards.value = db.cards.find().sort((a, b) => a.list_id - b.list_id || a.position - b.position)
+      await apiClient.post(`/cards/${cardId}/move`, { list_id: targetListId, position })
+      const index = cards.value.findIndex((card) => card.id === cardId)
+      if (index !== -1) {
+        cards.value[index] = { ...cards.value[index], list_id: targetListId, position }
+        cards.value = [...cards.value].sort((a, b) => a.list_id - b.list_id || a.position - b.position)
+      }
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
       throw e

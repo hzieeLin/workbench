@@ -1,27 +1,13 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { useCardStore } from '@/stores/card'
-import { db } from '@/database/db'
+import { apiClient } from '@/services/api'
 
-jest.mock('@/database/db', () => ({
-  db: {
-    cards: {
-      find: jest.fn().mockReturnValue([]),
-      create: jest.fn().mockImplementation((data) => ({
-        id: 1,
-        ...data,
-        created_at: new Date(),
-        updated_at: new Date(),
-        priority: data.priority || 'medium',
-        cardLabels: [],
-        timeBlocks: [],
-      })),
-      update: jest.fn().mockResolvedValue(undefined),
-      delete: jest.fn().mockResolvedValue(undefined),
-      moveCard: jest.fn().mockResolvedValue(undefined),
-    },
-    lists: {
-      find: jest.fn().mockReturnValue([]),
-    },
+jest.mock('@/services/api', () => ({
+  apiClient: {
+    get: jest.fn(),
+    post: jest.fn(),
+    patch: jest.fn(),
+    delete: jest.fn(),
   },
 }))
 
@@ -59,23 +45,38 @@ describe('Card Store', () => {
         updated_at: new Date(),
       },
     ]
-    const find = db.cards.find as jest.Mock
-    find.mockReturnValue(mockCards)
+    ;(apiClient.get as jest.Mock).mockResolvedValue(mockCards)
 
     const store = useCardStore()
     await store.fetchCards(1)
 
+    expect(apiClient.get).toHaveBeenCalledWith('/lists/1/cards')
     expect(store.cards).toContainEqual(mockCards[0])
     expect(store.cards).toContainEqual(mockCards[1])
     expect(store.loading).toBe(false)
   })
 
   it('creates a card successfully', async () => {
-    const store = useCardStore()
-    const newCard = await store.createCard(1, 'New Card', 'Description')
+    const newCard = {
+      id: 1,
+      list_id: 1,
+      title: 'New Card',
+      description: 'Description',
+      position: 1,
+      priority: 'medium',
+      created_at: new Date(),
+      updated_at: new Date(),
+    }
+    ;(apiClient.post as jest.Mock).mockResolvedValue(newCard)
 
-    expect(newCard).toBeDefined()
-    expect(newCard.title).toBe('New Card')
+    const store = useCardStore()
+    const result = await store.createCard(1, 'New Card', 'Description')
+
+    expect(apiClient.post).toHaveBeenCalledWith('/lists/1/cards', {
+      title: 'New Card',
+      description: 'Description',
+    })
+    expect(result).toEqual(newCard)
     expect(store.cards).toContainEqual(newCard)
   })
 
@@ -95,6 +96,7 @@ describe('Card Store', () => {
 
     await store.updateCard(1, { title: 'New Title' })
 
+    expect(apiClient.patch).toHaveBeenCalledWith('/cards/1', { title: 'New Title' })
     expect(store.cards[0].title).toBe('New Title')
   })
 
@@ -114,19 +116,37 @@ describe('Card Store', () => {
 
     await store.deleteCard(1)
 
+    expect(apiClient.delete).toHaveBeenCalledWith('/cards/1')
     expect(store.cards).toEqual([])
   })
 
   it('handles fetch error', async () => {
-    const find = db.cards.find as jest.Mock
-    find.mockImplementation(() => {
-      throw new Error('Database error')
-    })
+    ;(apiClient.get as jest.Mock).mockRejectedValue(new Error('API error'))
 
     const store = useCardStore()
     await store.fetchCards(1)
 
-    expect(store.error).toBe('Database error')
+    expect(store.error).toBe('API error')
     expect(store.loading).toBe(false)
+  })
+
+  it('moves a card through the API and updates local state', async () => {
+    const store = useCardStore()
+    store.cards = [
+      {
+        id: 1,
+        list_id: 1,
+        title: 'Move me',
+        position: 1,
+        priority: 'medium',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]
+
+    await store.moveCard(1, 2, 3)
+
+    expect(apiClient.post).toHaveBeenCalledWith('/cards/1/move', { list_id: 2, position: 3 })
+    expect(store.cards[0]).toMatchObject({ id: 1, list_id: 2, position: 3 })
   })
 })
