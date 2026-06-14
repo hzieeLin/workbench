@@ -10,6 +10,14 @@ export default defineConfig({
     },
   },
   base: './',
+  server: {
+    proxy: {
+      '/api': {
+        target: `http://localhost:${process.env.API_PORT || 3001}`,
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
