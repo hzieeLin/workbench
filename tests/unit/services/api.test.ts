@@ -1,4 +1,4 @@
-import { apiClient } from '@/services/api'
+import { apiClient, getApiBase } from '@/services/api'
 
 describe('apiClient', () => {
   beforeEach(() => {
@@ -28,5 +28,9 @@ describe('apiClient', () => {
     })
 
     await expect(apiClient.post('/boards', {})).rejects.toThrow('Board name is required')
+  })
+
+  it('uses localhost API URLs from packaged file pages', () => {
+    expect(getApiBase('file:')).toBe('http://localhost:3001/api')
   })
 })

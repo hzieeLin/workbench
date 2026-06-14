@@ -1,10 +1,14 @@
 import { Router } from 'express'
 import type { DataSource } from 'typeorm'
 import { Board } from '../../src/database/entities/Board'
+import { Card } from '../../src/database/entities/Card'
+import { List } from '../../src/database/entities/List'
 
 export function createBoardRouter(dataSource: DataSource) {
   const router = Router()
   const repo = dataSource.getRepository(Board)
+  const listRepo = dataSource.getRepository(List)
+  const cardRepo = dataSource.getRepository(Card)
 
   router.get('/', async (_req, res, next) => {
     try {
@@ -37,7 +41,16 @@ export function createBoardRouter(dataSource: DataSource) {
 
   router.delete('/:id', async (req, res, next) => {
     try {
-      await repo.delete(Number(req.params.id))
+      const boardId = Number(req.params.id)
+      const lists = await listRepo.find({ where: { board_id: boardId } })
+      for (const list of lists) {
+        const cards = await cardRepo.find({ where: { list_id: list.id } })
+        for (const card of cards) {
+          await cardRepo.delete(card.id)
+        }
+        await listRepo.delete(list.id)
+      }
+      await repo.delete(boardId)
       res.json({ ok: true })
     } catch (error) {
       next(error)

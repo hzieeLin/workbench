@@ -13,6 +13,8 @@
     },
     "files": [
       "dist/**/*",
+      "dist-electron/**/*",
+      "dist-server/**/*",
       "electron/**/*"
     ],
     "win": {
@@ -34,8 +36,8 @@
     "build:full": "npm run server:build && npm run build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "preview": "vite preview",
-    "electron:dev": "concurrently -k \"npm:dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "npm run build:electron && npm run build && electron-builder",
+    "electron:dev": "concurrently -k \"npm:server:dev\" \"npm:dev\" \"wait-on http://localhost:5173 http://localhost:3001/api/health && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "npm run server:build && npm run build:electron && npm run build && electron-builder",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "format": "prettier --write src/",
     "test": "jest",

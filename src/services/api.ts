@@ -1,7 +1,15 @@
 type JsonBody = Record<string, unknown>
 
+export function getApiBase(protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:') {
+  if (protocol === 'file:') {
+    return 'http://localhost:3001/api'
+  }
+
+  return '/api'
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`/api${path}`, options)
+  const response = await fetch(`${getApiBase()}${path}`, options)
   const payload = await response.json().catch(() => ({}))
 
   if (!response.ok) {

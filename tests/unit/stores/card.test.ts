@@ -100,6 +100,31 @@ describe('Card Store', () => {
     expect(store.cards[0].title).toBe('New Title')
   })
 
+  it('sends nulls when clearing nullable card fields', async () => {
+    const store = useCardStore()
+    store.cards = [
+      {
+        id: 1,
+        list_id: 1,
+        title: 'Title',
+        description: 'Old',
+        due_date: new Date(),
+        position: 1,
+        priority: 'medium',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]
+
+    await store.updateCard(1, { description: undefined, due_date: undefined })
+
+    expect(apiClient.patch).toHaveBeenCalledWith('/cards/1', {
+      description: null,
+      due_date: null,
+    })
+    expect(store.cards[0]).toMatchObject({ description: undefined, due_date: undefined })
+  })
+
   it('deletes a card successfully', async () => {
     const store = useCardStore()
     store.cards = [

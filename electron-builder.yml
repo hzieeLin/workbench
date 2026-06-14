@@ -4,6 +4,8 @@ directories:
   output: release
 files:
   - dist/**/*
+  - dist-electron/**/*
+  - dist-server/**/*
   - electron/**/*
 win:
   target: nsis

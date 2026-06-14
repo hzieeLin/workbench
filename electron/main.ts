@@ -1,5 +1,15 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
+import type { Server } from 'http'
+
+let apiServer: Server | null = null
+
+async function startBundledApi() {
+  if (process.env.NODE_ENV === 'development' || apiServer) return
+
+  const serverModule = await import(join(__dirname, '../dist-server/server/http.js'))
+  apiServer = await serverModule.startApiServer()
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -20,7 +30,8 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await startBundledApi()
   createWindow()
 
   app.on('activate', () => {
@@ -31,6 +42,7 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
+  apiServer?.close()
   if (process.platform !== 'darwin') {
     app.quit()
   }

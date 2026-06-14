@@ -62,7 +62,10 @@ export const useCardStore = defineStore('card', () => {
   async function updateCard(id: number, data: Partial<Card>) {
     error.value = null
     try {
-      await apiClient.patch(`/cards/${id}`, data as Record<string, unknown>)
+      const payload: Record<string, unknown> = { ...data }
+      if ('description' in payload && payload.description === undefined) payload.description = null
+      if ('due_date' in payload && payload.due_date === undefined) payload.due_date = null
+      await apiClient.patch(`/cards/${id}`, payload)
       const index = cards.value.findIndex((c) => c.id === id)
       if (index !== -1) {
         cards.value[index] = { ...cards.value[index], ...data }
