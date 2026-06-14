@@ -67,14 +67,14 @@ describe('TaskCard', () => {
     const wrapper = mount(TaskCard, {
       props: { card: { ...mockCard, due_date: dueDate } },
     })
-    expect(wrapper.text()).toContain('📅')
+    expect(wrapper.text()).toContain('日程')
   })
 
   it('does not render due date when not provided', () => {
     const wrapper = mount(TaskCard, {
       props: { card: { ...mockCard, due_date: undefined } },
     })
-    expect(wrapper.text()).not.toContain('📅')
+    expect(wrapper.text()).not.toContain('日程')
   })
 
   it('has task-card class', () => {

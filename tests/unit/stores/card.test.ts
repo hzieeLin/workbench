@@ -1,28 +1,27 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { useCardStore } from '@/stores/card'
-import { AppDataSource } from '@/database/connection'
+import { db } from '@/database/db'
 
-jest.mock('@/database/connection', () => ({
-  AppDataSource: {
-    getRepository: jest.fn().mockReturnValue({
-      find: jest.fn().mockResolvedValue([]),
+jest.mock('@/database/db', () => ({
+  db: {
+    cards: {
+      find: jest.fn().mockReturnValue([]),
       create: jest.fn().mockImplementation((data) => ({
         id: 1,
         ...data,
         created_at: new Date(),
         updated_at: new Date(),
+        priority: data.priority || 'medium',
+        cardLabels: [],
+        timeBlocks: [],
       })),
-      save: jest.fn().mockImplementation((entity) =>
-        Promise.resolve({
-          ...entity,
-          id: 1,
-          created_at: new Date(),
-          updated_at: new Date(),
-        })
-      ),
       update: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
-    }),
+      moveCard: jest.fn().mockResolvedValue(undefined),
+    },
+    lists: {
+      find: jest.fn().mockReturnValue([]),
+    },
   },
 }))
 
@@ -60,8 +59,8 @@ describe('Card Store', () => {
         updated_at: new Date(),
       },
     ]
-    const mockRepo = AppDataSource.getRepository as jest.Mock
-    mockRepo().find.mockResolvedValue(mockCards)
+    const find = db.cards.find as jest.Mock
+    find.mockReturnValue(mockCards)
 
     const store = useCardStore()
     await store.fetchCards(1)
@@ -119,8 +118,10 @@ describe('Card Store', () => {
   })
 
   it('handles fetch error', async () => {
-    const mockRepo = AppDataSource.getRepository as jest.Mock
-    mockRepo().find.mockRejectedValue(new Error('Database error'))
+    const find = db.cards.find as jest.Mock
+    find.mockImplementation(() => {
+      throw new Error('Database error')
+    })
 
     const store = useCardStore()
     await store.fetchCards(1)

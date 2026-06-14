@@ -16,13 +16,12 @@ module.exports = {
     }
 
     // Find where the ESM import starts (may be on same line as base64 sourcemap)
-    const importIdx = code.indexOf('import { renderList')
-    if (importIdx === -1) {
-      return { code, map: result.map }
-    }
+    const importIdx = code.indexOf('import {')
+    const renderIdx = code.indexOf('export function render(')
+    const splitIdx = importIdx === -1 ? renderIdx : importIdx
 
-    const cjsPart = code.substring(0, importIdx)
-    const esmPart = code.substring(importIdx)
+    const cjsPart = code.substring(0, splitIdx)
+    const esmPart = code.substring(splitIdx)
 
     // Extract imports and convert to CJS requires
     const importRegex = /import\s*\{([^}]+)\}\s*from\s*"([^"]+)"\s*;?/

@@ -1,6 +1,12 @@
 <template>
   <div class="statistics-view">
-    <h2>统计分析</h2>
+    <div class="stats-header">
+      <div>
+        <p>统计分析</p>
+        <h2>效率概览</h2>
+      </div>
+      <ExportButton @export="handleExport" />
+    </div>
     <div class="stats-grid">
       <div class="stat-card">
         <h3>任务完成率</h3>
@@ -14,9 +20,6 @@
         <h3>效率趋势</h3>
         <ProductivityTrends :data="trendData" />
       </div>
-    </div>
-    <div class="export-section">
-      <ExportButton @export="handleExport" />
     </div>
   </div>
 </template>
@@ -61,38 +64,50 @@ function handleExport(format: 'csv' | 'json') {
 
 <style scoped>
 .statistics-view {
-  padding: 20px;
+  height: 100%;
 }
 
-h2 {
-  margin-bottom: 24px;
+.stats-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stats-header p {
+  margin-bottom: 6px;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.stats-header h2 {
+  color: var(--color-text);
+  font-size: 26px;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .stat-card {
-  background: white;
+  background: rgba(255, 253, 248, 0.86);
+  border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-soft);
 }
 
 .stat-card h3 {
   margin-bottom: 16px;
-  color: #333;
+  color: var(--color-text);
+  font-size: 16px;
 }
 
 .stat-card.full-width {
   grid-column: span 2;
-}
-
-.export-section {
-  display: flex;
-  justify-content: flex-end;
 }
 </style>

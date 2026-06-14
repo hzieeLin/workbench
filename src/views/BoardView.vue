@@ -1,9 +1,12 @@
 <template>
   <div class="board-view">
     <div class="board-header">
-      <h2>{{ currentBoard?.name || '选择一个看板' }}</h2>
+      <div>
+        <p class="eyebrow">任务看板</p>
+        <h2>{{ currentBoard?.name || '请选择一个看板' }}</h2>
+      </div>
       <div class="board-actions">
-        <button @click="showCreateList = true">+ 新建列表</button>
+        <button :disabled="!currentBoard" @click="showCreateList = true">+ 新建列表</button>
       </div>
     </div>
     <div class="board-columns" v-if="currentBoard">
@@ -15,7 +18,8 @@
       />
     </div>
     <div v-else class="empty-state">
-      <p>请从左侧选择一个看板，或创建新看板</p>
+      <h3>还没有打开的看板</h3>
+      <p>请从左侧选择一个看板，或创建新的看板开始整理任务。</p>
     </div>
 
     <CreateListModal
@@ -62,13 +66,49 @@ function openCardDetail(card: Card) {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .board-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  margin-bottom: 6px;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.board-header h2 {
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.board-actions button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(36, 120, 106, 0.18);
+}
+
+.board-actions button:hover:not(:disabled) {
+  background: var(--color-primary-strong);
+}
+
+.board-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .board-columns {
@@ -76,14 +116,28 @@ function openCardDetail(card: Card) {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding-bottom: 16px;
+  padding: 2px 2px 18px;
 }
 
 .empty-state {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #888;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--color-muted);
+  background: rgba(255, 253, 248, 0.62);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+}
+
+.empty-state h3 {
+  margin-bottom: 8px;
+  color: var(--color-text);
+  font-size: 18px;
+}
+
+.empty-state p {
+  max-width: 360px;
+  line-height: 1.7;
 }
 </style>

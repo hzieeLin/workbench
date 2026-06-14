@@ -3,7 +3,7 @@
     <div class="modal large">
       <div class="modal-header">
         <h3>{{ card.title }}</h3>
-        <button class="btn-icon" @click="$emit('close')">✕</button>
+        <button class="btn-icon" @click="$emit('close')">×</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -14,22 +14,24 @@
           <label>描述</label>
           <textarea v-model="editDescription"></textarea>
         </div>
-        <div class="form-group">
-          <label>优先级</label>
-          <select v-model="editPriority">
-            <option value="low">低</option>
-            <option value="medium">中</option>
-            <option value="high">高</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>截止日期</label>
-          <input type="date" v-model="editDueDate" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label>优先级</label>
+            <select v-model="editPriority">
+              <option value="low">低</option>
+              <option value="medium">中</option>
+              <option value="high">高</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>截止日期</label>
+            <input type="date" v-model="editDueDate" />
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button @click="handleSave">保存</button>
         <button @click="handleDelete" class="danger">删除</button>
+        <button @click="handleSave" class="primary">保存</button>
       </div>
     </div>
   </div>
@@ -68,7 +70,7 @@ async function handleSave() {
 }
 
 async function handleDelete() {
-  if (confirm('确定要删除这个卡片吗？')) {
+  if (confirm('确定要删除这张卡片吗？')) {
     await cardStore.deleteCard(props.card.id)
     emit('close')
   }
@@ -78,40 +80,61 @@ async function handleDelete() {
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  z-index: 20;
+  background: rgba(33, 50, 60, 0.24);
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(6px);
 }
 
 .modal {
-  background: white;
-  border-radius: 8px;
   width: 500px;
-  max-height: 80vh;
+  max-height: 82vh;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .modal.large {
-  width: 600px;
+  width: 620px;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.modal-header h3 {
+  color: var(--color-text);
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  color: var(--color-muted);
 }
 
 .modal-body {
   padding: 20px;
   overflow-y: auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .form-group {
@@ -121,39 +144,59 @@ async function handleDelete() {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  font-weight: 500;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  outline: none;
+  background: white;
+  color: var(--color-text);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .form-group textarea {
-  height: 120px;
+  height: 128px;
   resize: vertical;
 }
 
 .modal-footer {
   padding: 16px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border-soft);
   display: flex;
   justify-content: space-between;
 }
 
 .modal-footer button {
+  min-height: 36px;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 700;
 }
 
-.modal-footer button.danger {
-  background: #e74c3c;
+.primary {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
   color: white;
-  border: none;
+}
+
+.danger {
+  border: 1px solid var(--color-red-soft);
+  background: var(--color-red-soft);
+  color: var(--color-red);
 }
 </style>

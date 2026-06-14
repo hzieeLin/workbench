@@ -62,18 +62,24 @@ function handleSlotClick(hour: number) {
 .day-view {
   display: flex;
   height: 100%;
+  overflow: auto;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .time-column {
   width: 60px;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--color-border-soft);
+  background: var(--color-surface-soft);
 }
 
 .hour-label {
   height: 60px;
   padding: 4px 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-muted);
   text-align: right;
 }
 
@@ -84,22 +90,23 @@ function handleSlotClick(hour: number) {
 
 .time-slot {
   height: 60px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-soft);
   position: relative;
 }
 
 .time-slot:hover {
-  background: #f5f5f5;
+  background: var(--color-primary-soft);
 }
 
 .time-block {
   position: absolute;
-  left: 4px;
-  right: 4px;
-  background: #4a90d9;
+  left: 8px;
+  right: 8px;
+  background: var(--color-primary);
   color: white;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px;
+  box-shadow: 0 8px 14px rgba(36, 120, 106, 0.16);
 }
 </style>

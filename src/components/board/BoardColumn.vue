@@ -63,21 +63,44 @@ function handleDrop(event: DragEvent) {
 
 <style scoped>
 .board-column {
-  min-width: 280px;
-  max-width: 280px;
-  background: #f4f5f7;
+  min-width: 292px;
+  max-width: 292px;
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   max-height: 100%;
+  box-shadow: var(--shadow-soft);
 }
 
 .column-header {
-  padding: 12px;
+  padding: 14px 14px 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
+}
+
+.column-header h3 {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.btn-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.btn-icon:hover {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border-soft);
 }
 
 .column-cards {
@@ -88,15 +111,17 @@ function handleDrop(event: DragEvent) {
 
 .add-card-btn {
   margin: 12px;
+  min-height: 36px;
   padding: 8px;
-  background: none;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
+  background: rgba(36, 120, 106, 0.05);
+  border: 1px dashed rgba(36, 120, 106, 0.35);
+  border-radius: 8px;
   cursor: pointer;
-  color: #666;
+  color: var(--color-primary-strong);
+  font-weight: 700;
 }
 
 .add-card-btn:hover {
-  background: #e8e8e8;
+  background: var(--color-primary-soft);
 }
 </style>

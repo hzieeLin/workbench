@@ -22,17 +22,21 @@ import StatusBar from './StatusBar.vue'
   display: flex;
   height: 100vh;
   overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(238, 244, 242, 0.9), rgba(246, 244, 239, 0.95)),
+    var(--color-bg);
 }
 
 .main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .content {
   flex: 1;
   overflow: auto;
-  padding: 16px;
+  padding: 20px 24px;
 }
 </style>

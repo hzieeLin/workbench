@@ -50,13 +50,22 @@ onMounted(() => {
         datasets: [
           {
             data: [props.data.completed, props.data.pending],
-            backgroundColor: ['#4caf50', '#ff9800'],
+            backgroundColor: ['#2f7d4b', '#b7791f'],
+            borderColor: '#fffdf8',
+            borderWidth: 3,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#718087',
+            },
+          },
+        },
       },
     })
   }
@@ -78,22 +87,27 @@ onMounted(() => {
 
 .stats-summary {
   display: flex;
-  gap: 30px;
+  gap: 18px;
 }
 
 .stat {
+  min-width: 76px;
+  padding: 10px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  background: var(--color-surface-soft);
   text-align: center;
 }
 
 .stat .value {
   display: block;
   font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: var(--color-text);
 }
 
 .stat .label {
   font-size: 12px;
-  color: #666;
+  color: var(--color-muted);
 }
 </style>

@@ -46,13 +46,10 @@ const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 const calendarDays = computed(() => {
   const year = props.currentDate.getFullYear()
   const month = props.currentDate.getMonth()
-
   const firstDay = new Date(year, month, 1)
-
   const days = []
   const startDate = new Date(firstDay)
   startDate.setDate(startDate.getDate() - firstDay.getDay())
-
   const today = new Date()
 
   for (let i = 0; i < 42; i++) {
@@ -76,8 +73,8 @@ function getBlocksForDay(date: Date): TimeBlock[] {
 }
 
 function getBlockColor(block: TimeBlock): string {
-  if (block.card_id) return '#4a90d9'
-  return '#999'
+  if (block.card_id) return '#24786a'
+  return '#8a978f'
 }
 </script>
 
@@ -86,13 +83,20 @@ function getBlockColor(block: TimeBlock): string {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .weekday-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: #f5f5f5;
-  font-weight: 600;
+  background: var(--color-surface-soft);
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .weekday-header div {
@@ -104,45 +108,63 @@ function getBlockColor(block: TimeBlock): string {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(100px, 1fr);
+  grid-auto-rows: minmax(98px, 1fr);
 }
 
 .day-cell {
-  border: 1px solid #eee;
-  padding: 4px;
+  border-top: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+  padding: 8px;
   cursor: pointer;
+  background: rgba(255, 253, 248, 0.86);
+  transition: background 0.2s ease;
+}
+
+.day-cell:nth-child(7n) {
+  border-right: none;
 }
 
 .day-cell:hover {
-  background: #f9f9f9;
+  background: var(--color-primary-soft);
 }
 
 .day-cell.other-month {
-  background: #fafafa;
+  background: #f4f2eb;
 }
 
 .day-cell.other-month .day-number {
-  color: #ccc;
+  color: var(--color-faint);
 }
 
 .day-cell.today {
-  background: #e3f2fd;
+  background: #edf7f4;
 }
 
 .day-number {
+  display: inline-grid;
+  min-width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.today .day-number {
+  background: var(--color-primary);
+  color: white;
 }
 
 .day-events {
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .event-block {
   font-size: 11px;
-  padding: 2px 4px;
-  margin-bottom: 2px;
-  border-radius: 3px;
+  padding: 3px 6px;
+  margin-bottom: 3px;
+  border-radius: 6px;
   color: white;
   overflow: hidden;
   text-overflow: ellipsis;

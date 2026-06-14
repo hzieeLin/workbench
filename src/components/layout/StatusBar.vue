@@ -25,14 +25,14 @@ const taskCount = computed(() => cardStore.cards.length)
 
 <style scoped>
 .statusbar {
-  height: 32px;
-  background: #f5f5f5;
-  border-top: 1px solid #e0e0e0;
+  height: 34px;
+  background: rgba(255, 253, 248, 0.88);
+  border-top: 1px solid var(--color-border-soft);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-muted);
 }
 </style>

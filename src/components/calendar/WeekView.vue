@@ -79,18 +79,24 @@ function handleSlotClick(day: Date, hour: number) {
 .week-view {
   display: flex;
   height: 100%;
+  overflow: auto;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .time-column {
   width: 60px;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--color-border-soft);
+  background: var(--color-surface-soft);
 }
 
 .hour-label {
   height: 60px;
   padding: 4px 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-muted);
   text-align: right;
 }
 
@@ -101,29 +107,30 @@ function handleSlotClick(day: Date, hour: number) {
 
 .day-column {
   flex: 1;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--color-border-soft);
   position: relative;
 }
 
 .time-slot {
   height: 60px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-soft);
   position: relative;
 }
 
 .time-slot:hover {
-  background: #f5f5f5;
+  background: var(--color-primary-soft);
 }
 
 .time-block {
   position: absolute;
-  left: 2px;
-  right: 2px;
-  background: #4a90d9;
+  left: 4px;
+  right: 4px;
+  background: var(--color-primary);
   color: white;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 5px 6px;
+  border-radius: 8px;
   font-size: 12px;
   overflow: hidden;
+  box-shadow: 0 8px 14px rgba(36, 120, 106, 0.16);
 }
 </style>

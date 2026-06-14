@@ -12,7 +12,7 @@
     </div>
     <h4 class="card-title">{{ card.title }}</h4>
     <div class="card-meta">
-      <span v-if="card.due_date" class="due-date"> 📅 {{ formatDate(card.due_date) }} </span>
+      <span v-if="card.due_date" class="due-date">日程 {{ formatDate(card.due_date) }}</span>
       <span class="priority" :class="card.priority">
         {{ priorityText }}
       </span>
@@ -23,12 +23,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Card } from '@/database/entities/Card'
+import { Label } from '@/database/entities/Label'
 
 const props = defineProps<{
   card: Card
 }>()
-
-import { Label } from '@/database/entities/Label'
 
 const cardLabels = computed((): Label[] => {
   return []
@@ -46,21 +45,28 @@ function formatDate(date: Date) {
 
 <style scoped>
 .task-card {
-  background: white;
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-soft);
   border-radius: 8px;
   padding: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 1px 0 rgba(33, 50, 60, 0.04);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .task-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  border-color: rgba(36, 120, 106, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .task-card.high-priority {
-  border-left: 4px solid #e74c3c;
+  border-left: 4px solid var(--color-red);
 }
 
 .card-labels {
@@ -71,42 +77,55 @@ function formatDate(date: Date) {
 }
 
 .label {
-  font-size: 12px;
+  font-size: 11px;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: 999px;
   color: white;
+  font-weight: 700;
 }
 
 .card-title {
   font-size: 14px;
-  margin-bottom: 8px;
-  line-height: 1.4;
+  margin-bottom: 10px;
+  line-height: 1.45;
+  color: var(--color-text);
 }
 
 .card-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-muted);
+}
+
+.due-date {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .priority {
-  padding: 2px 8px;
-  border-radius: 4px;
+  min-width: 28px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 800;
 }
 
 .priority.low {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--color-green-soft);
+  color: var(--color-green);
 }
 
 .priority.medium {
-  background: #fff3e0;
-  color: #f57c00;
+  background: var(--color-amber-soft);
+  color: var(--color-amber);
 }
 
 .priority.high {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--color-red-soft);
+  color: var(--color-red);
 }
 </style>

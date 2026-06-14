@@ -75,41 +75,48 @@ export const useStatisticsStore = defineStore('statistics', () => {
     return Math.round((stats.value.completedCards / stats.value.totalCards) * 100)
   })
 
+  async function loadSnapshot() {
+    const boardRepo = AppDataSource.getRepository(Board)
+    const listRepo = AppDataSource.getRepository(List)
+    const cardRepo = AppDataSource.getRepository(Card)
+    const timeBlockRepo = AppDataSource.getRepository(TimeBlock)
+
+    const boards: Board[] = await boardRepo.find()
+    const lists: List[] = await listRepo.find()
+    const cards: Card[] = await cardRepo.find()
+    const timeBlocks: TimeBlock[] = await timeBlockRepo.find()
+
+    return { boards, lists, cards, timeBlocks }
+  }
+
+  function getCompletedListIds(lists: List[]) {
+    return new Set(lists.filter((list) => list.name === '已完成').map((list) => list.id))
+  }
+
   async function fetchStats() {
     loading.value = true
     error.value = null
     try {
-      const boardRepo = AppDataSource.getRepository(Board)
-      const listRepo = AppDataSource.getRepository(List)
-      const cardRepo = AppDataSource.getRepository(Card)
+      const { boards, lists, cards } = await loadSnapshot()
+      const completedListIds = getCompletedListIds(lists)
+      const now = new Date().getTime()
 
-      const totalBoards = await boardRepo.count()
-      const totalLists = await listRepo.count()
-      const totalCards = await cardRepo.count()
-
-      const now = new Date()
-      const overdueCards = await cardRepo
-        .createQueryBuilder('card')
-        .where('card.due_date < :now', { now })
-        .getCount()
-
-      const cardsByPriority = {
-        low: await cardRepo.count({ where: { priority: 'low' } }),
-        medium: await cardRepo.count({ where: { priority: 'medium' } }),
-        high: await cardRepo.count({ where: { priority: 'high' } }),
-      }
-
-      const completedCards = await cardRepo.count({
-        where: { priority: 'medium' },
-      })
+      const completedCards = cards.filter((card) => completedListIds.has(card.list_id)).length
+      const overdueCards = cards.filter((card) => {
+        return card.due_date && new Date(card.due_date).getTime() < now
+      }).length
 
       stats.value = {
-        totalBoards,
-        totalLists,
-        totalCards,
+        totalBoards: boards.length,
+        totalLists: lists.length,
+        totalCards: cards.length,
         completedCards,
         overdueCards,
-        cardsByPriority,
+        cardsByPriority: {
+          low: cards.filter((card) => card.priority === 'low').length,
+          medium: cards.filter((card) => card.priority === 'medium').length,
+          high: cards.filter((card) => card.priority === 'high').length,
+        },
       }
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
@@ -119,114 +126,119 @@ export const useStatisticsStore = defineStore('statistics', () => {
   }
 
   async function fetchStatistics() {
-    await fetchStats()
+    loading.value = true
+    error.value = null
+    try {
+      const { boards, lists, cards, timeBlocks } = await loadSnapshot()
+      const completedListIds = getCompletedListIds(lists)
+      const completedCards = cards.filter((card) => completedListIds.has(card.list_id)).length
 
-    const cardRepo = AppDataSource.getRepository(Card)
-    const timeBlockRepo = AppDataSource.getRepository(TimeBlock)
-
-    const totalCards = await cardRepo.count()
-
-    const completedCards = await cardRepo
-      .createQueryBuilder('card')
-      .innerJoin('card.list', 'list')
-      .where('list.name = :name', { name: '已完成' })
-      .getCount()
-
-    completionData.value = {
-      completed: completedCards,
-      pending: totalCards - completedCards,
-      total: totalCards,
-    }
-
-    const boards = await AppDataSource.getRepository(Board).find()
-
-    const timeDistributionLabels: string[] = []
-    const timeDistributionData: number[] = []
-
-    for (const board of boards) {
-      const timeBlocks = await timeBlockRepo
-        .createQueryBuilder('tb')
-        .innerJoin('tb.card', 'card')
-        .innerJoin('card.list', 'list')
-        .innerJoin('list.board', 'board')
-        .where('board.id = :boardId', { boardId: board.id })
-        .getMany()
-
-      let totalMinutes = 0
-      for (const block of timeBlocks) {
-        const diff = new Date(block.end_time).getTime() - new Date(block.start_time).getTime()
-        totalMinutes += Math.round(diff / 60000)
+      completionData.value = {
+        completed: completedCards,
+        pending: cards.length - completedCards,
+        total: cards.length,
       }
 
-      timeDistributionLabels.push(board.name)
-      timeDistributionData.push(totalMinutes)
-    }
-
-    timeData.value = {
-      labels: timeDistributionLabels,
-      datasets: [
-        {
-          label: '工作时间 (分钟)',
-          data: timeDistributionData,
-          backgroundColor: '#4a90d9',
+      stats.value = {
+        totalBoards: boards.length,
+        totalLists: lists.length,
+        totalCards: cards.length,
+        completedCards,
+        overdueCards: cards.filter((card) => {
+          return card.due_date && new Date(card.due_date).getTime() < Date.now()
+        }).length,
+        cardsByPriority: {
+          low: cards.filter((card) => card.priority === 'low').length,
+          medium: cards.filter((card) => card.priority === 'medium').length,
+          high: cards.filter((card) => card.priority === 'high').length,
         },
-      ],
-    }
+      }
 
-    const now = new Date()
-    const trendLabels: string[] = []
-    const trendCompletedData: number[] = []
-    const trendCreatedData: number[] = []
+      const timeDistributionLabels: string[] = []
+      const timeDistributionData: number[] = []
 
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now)
-      date.setDate(date.getDate() - i)
-      const dateStr = `${date.getMonth() + 1}/${date.getDate()}`
-      trendLabels.push(dateStr)
+      for (const board of boards) {
+        const boardListIds = new Set(
+          lists.filter((list) => list.board_id === board.id).map((list) => list.id)
+        )
+        const boardCardIds = new Set(
+          cards.filter((card) => boardListIds.has(card.list_id)).map((card) => card.id)
+        )
+        const totalMinutes = timeBlocks
+          .filter((block) => block.card_id && boardCardIds.has(block.card_id))
+          .reduce((sum, block) => {
+            const diff = new Date(block.end_time).getTime() - new Date(block.start_time).getTime()
+            return sum + Math.max(0, Math.round(diff / 60000))
+          }, 0)
 
-      const dayStart = new Date(date)
-      dayStart.setHours(0, 0, 0, 0)
-      const dayEnd = new Date(date)
-      dayEnd.setHours(23, 59, 59, 999)
+        timeDistributionLabels.push(board.name)
+        timeDistributionData.push(totalMinutes)
+      }
 
-      const createdCount = await cardRepo
-        .createQueryBuilder('card')
-        .where('card.created_at BETWEEN :start AND :end', {
-          start: dayStart,
-          end: dayEnd,
-        })
-        .getCount()
+      timeData.value = {
+        labels: timeDistributionLabels,
+        datasets: [
+          {
+            label: '工作时间（分钟）',
+            data: timeDistributionData,
+            backgroundColor: '#24786a',
+          },
+        ],
+      }
 
-      const completedCount = await cardRepo
-        .createQueryBuilder('card')
-        .innerJoin('card.list', 'list')
-        .where('list.name = :name', { name: '已完成' })
-        .andWhere('card.updated_at BETWEEN :start AND :end', {
-          start: dayStart,
-          end: dayEnd,
-        })
-        .getCount()
+      const now = new Date()
+      const trendLabels: string[] = []
+      const trendCompletedData: number[] = []
+      const trendCreatedData: number[] = []
 
-      trendCreatedData.push(createdCount)
-      trendCompletedData.push(completedCount)
-    }
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now)
+        date.setDate(date.getDate() - i)
+        const dateStr = `${date.getMonth() + 1}/${date.getDate()}`
+        trendLabels.push(dateStr)
 
-    trendData.value = {
-      labels: trendLabels,
-      datasets: [
-        {
-          label: '新建任务',
-          data: trendCreatedData,
-          borderColor: '#4a90d9',
-          tension: 0.3,
-        },
-        {
-          label: '完成任务',
-          data: trendCompletedData,
-          borderColor: '#4caf50',
-          tension: 0.3,
-        },
-      ],
+        const dayStart = new Date(date)
+        dayStart.setHours(0, 0, 0, 0)
+        const dayEnd = new Date(date)
+        dayEnd.setHours(23, 59, 59, 999)
+        const start = dayStart.getTime()
+        const end = dayEnd.getTime()
+
+        const createdCount = cards.filter((card) => {
+          const createdAt = new Date(card.created_at).getTime()
+          return createdAt >= start && createdAt <= end
+        }).length
+
+        const completedCount = cards.filter((card) => {
+          const updatedAt = new Date(card.updated_at).getTime()
+          return completedListIds.has(card.list_id) && updatedAt >= start && updatedAt <= end
+        }).length
+
+        trendCreatedData.push(createdCount)
+        trendCompletedData.push(completedCount)
+      }
+
+      trendData.value = {
+        labels: trendLabels,
+        datasets: [
+          {
+            label: '新建任务',
+            data: trendCreatedData,
+            borderColor: '#24786a',
+            tension: 0.3,
+          },
+          {
+            label: '完成任务',
+            data: trendCompletedData,
+            borderColor: '#2f7d4b',
+            tension: 0.3,
+          },
+        ],
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : String(e)
+    } finally {
+      loading.value = false
     }
   }
 
