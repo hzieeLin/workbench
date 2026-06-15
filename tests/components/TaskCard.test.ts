@@ -1,7 +1,11 @@
 import { mount } from '@vue/test-utils'
+import { setActivePinia, createPinia } from 'pinia'
 import TaskCard from '@/components/board/TaskCard.vue'
 
 describe('TaskCard', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
   const mockCard = {
     id: 1,
     list_id: 1,
@@ -67,14 +71,14 @@ describe('TaskCard', () => {
     const wrapper = mount(TaskCard, {
       props: { card: { ...mockCard, due_date: dueDate } },
     })
-    expect(wrapper.text()).toContain('日程')
+    expect(wrapper.text()).toContain('2024/1/15')
   })
 
   it('does not render due date when not provided', () => {
     const wrapper = mount(TaskCard, {
       props: { card: { ...mockCard, due_date: undefined } },
     })
-    expect(wrapper.text()).not.toContain('日程')
+    expect(wrapper.find('.due-date').exists()).toBe(false)
   })
 
   it('has task-card class', () => {
