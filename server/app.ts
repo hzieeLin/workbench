@@ -3,6 +3,7 @@ import express, { type ErrorRequestHandler } from 'express'
 import type { DataSource } from 'typeorm'
 import { createBoardRouter } from './routes/boards'
 import { createCardRouter } from './routes/cards'
+import { createCommentRouter } from './routes/comments'
 import { createListRouter } from './routes/lists'
 
 export function createApp(dataSource?: DataSource) {
@@ -21,6 +22,7 @@ export function createApp(dataSource?: DataSource) {
     app.use('/api/boards', createBoardRouter(dataSource))
     app.use('/api', createListRouter(dataSource))
     app.use('/api', createCardRouter(dataSource))
+    app.use('/api', createCommentRouter(dataSource))
   }
 
   const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {

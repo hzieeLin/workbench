@@ -5,6 +5,7 @@ import { Board } from '../src/database/entities/Board'
 import { CalendarEvent } from '../src/database/entities/CalendarEvent'
 import { Card } from '../src/database/entities/Card'
 import { CardLabel } from '../src/database/entities/CardLabel'
+import { Comment } from '../src/database/entities/Comment'
 import { Label } from '../src/database/entities/Label'
 import { List } from '../src/database/entities/List'
 import { TimeBlock } from '../src/database/entities/TimeBlock'
@@ -21,7 +22,7 @@ export function createDataSource() {
     database: config.db.database,
     synchronize: false,
     logging: false,
-    entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog],
+    entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment],
     migrations: [InitialSchema1710000000000],
   })
 }

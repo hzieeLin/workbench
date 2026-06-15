@@ -6,6 +6,7 @@ import request from 'supertest'
 import { createApp } from '../../server/app'
 import { Board } from '../../src/database/entities/Board'
 import { Card } from '../../src/database/entities/Card'
+import { Comment } from '../../src/database/entities/Comment'
 import { List } from '../../src/database/entities/List'
 
 type RepoOptions<T> = {
@@ -70,6 +71,7 @@ describe('task workflow API', () => {
         if (entity === Board) return boardRepo
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
+        if (entity === Comment) return createRepo<any>()
         throw new Error('Unexpected repository')
       },
     } as any
@@ -116,6 +118,7 @@ describe('task workflow API', () => {
         if (entity === Board) return boardRepo
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
+        if (entity === Comment) return createRepo<any>()
         throw new Error('Unexpected repository')
       },
     } as any
@@ -138,6 +141,7 @@ describe('task workflow API', () => {
         if (entity === Board) return boardRepo
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
+        if (entity === Comment) return createRepo<any>()
         throw new Error('Unexpected repository')
       },
     } as any
@@ -174,6 +178,7 @@ describe('task workflow API', () => {
         if (entity === Board) return boardRepo
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
+        if (entity === Comment) return createRepo<any>()
         throw new Error('Unexpected repository')
       },
     } as any
@@ -206,6 +211,7 @@ describe('task workflow API', () => {
         if (entity === Board) return boardRepo
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
+        if (entity === Comment) return createRepo<any>()
         throw new Error('Unexpected repository')
       },
     } as any
