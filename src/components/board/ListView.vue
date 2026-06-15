@@ -3,6 +3,9 @@
     <table class="card-table">
       <thead>
         <tr>
+          <th class="checkbox-col">
+            <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" />
+          </th>
           <th @click="sortBy('title')" class="sortable">
             标题
             <span v-if="sortField === 'title'" class="sort-indicator">
@@ -27,7 +30,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="card in paginatedCards" :key="card.id" class="card-row">
+        <tr
+          v-for="card in paginatedCards"
+          :key="card.id"
+          class="card-row"
+          :class="{ selected: selectedIds.has(card.id) }"
+          @click="toggleSelect(card.id)"
+        >
+          <td class="checkbox-col" @click.stop>
+            <input type="checkbox" :checked="selectedIds.has(card.id)" @change="toggleSelect(card.id)" />
+          </td>
           <td class="card-title">{{ card.title }}</td>
           <td class="card-labels">
             <LabelBadge :labels="getCardLabels(card)" :max-display="2" />
@@ -45,8 +57,8 @@
           </td>
           <td class="card-list">{{ getListName(card.list_id) }}</td>
           <td class="card-actions">
-            <button @click="$emit('edit', card)" class="btn-icon">编辑</button>
-            <button @click="$emit('delete', card.id)" class="btn-icon danger">删除</button>
+            <button @click.stop="$emit('edit', card)" class="btn-icon">编辑</button>
+            <button @click.stop="$emit('delete', card.id)" class="btn-icon danger">删除</button>
           </td>
         </tr>
       </tbody>
@@ -79,12 +91,18 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'edit', card: Card): void
   (e: 'delete', id: number): void
+  (e: 'select', ids: number[]): void
 }>()
 
 const sortField = ref<string>('created_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 const currentPage = ref(1)
 const pageSize = 20
+const selectedIds = ref<Set<number>>(new Set())
+
+const allSelected = computed(() => {
+  return paginatedCards.value.length > 0 && paginatedCards.value.every(c => selectedIds.value.has(c.id))
+})
 
 const sortedCards = computed(() => {
   return [...props.cards].sort((a, b) => {
@@ -121,6 +139,26 @@ function sortBy(field: string) {
     sortField.value = field
     sortDirection.value = 'asc'
   }
+}
+
+function toggleSelect(id: number) {
+  if (selectedIds.value.has(id)) {
+    selectedIds.value.delete(id)
+  } else {
+    selectedIds.value.add(id)
+  }
+  selectedIds.value = new Set(selectedIds.value)
+  emit('select', Array.from(selectedIds.value))
+}
+
+function toggleSelectAll() {
+  if (allSelected.value) {
+    paginatedCards.value.forEach(c => selectedIds.value.delete(c.id))
+  } else {
+    paginatedCards.value.forEach(c => selectedIds.value.add(c.id))
+  }
+  selectedIds.value = new Set(selectedIds.value)
+  emit('select', Array.from(selectedIds.value))
 }
 
 function getCardLabels(card: Card): Label[] {
@@ -185,8 +223,29 @@ function isOverdue(date: Date): boolean {
   color: var(--color-accent);
 }
 
+.checkbox-col {
+  width: 40px;
+  text-align: center;
+}
+
+.checkbox-col input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+}
+
+.card-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
 .card-row:hover {
   background: var(--color-surface-hover);
+}
+
+.card-row.selected {
+  background: var(--color-accent-soft);
 }
 
 .card-title {
