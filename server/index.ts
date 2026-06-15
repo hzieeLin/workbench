@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { startApiServer } from './http'
 
 async function main() {

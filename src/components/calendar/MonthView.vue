@@ -73,8 +73,8 @@ function getBlocksForDay(date: Date): TimeBlock[] {
 }
 
 function getBlockColor(block: TimeBlock): string {
-  if (block.card_id) return '#24786a'
-  return '#8a978f'
+  if (block.card_id) return 'var(--color-accent)'
+  return 'var(--color-text-tertiary)'
 }
 </script>
 
@@ -84,19 +84,20 @@ function getBlockColor(block: TimeBlock): string {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-glass);
+  backdrop-filter: var(--blur-sm);
 }
 
 .weekday-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: var(--color-surface-soft);
-  color: var(--color-muted);
+  background: var(--color-surface);
+  color: var(--color-text-tertiary);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .weekday-header div {
@@ -112,11 +113,11 @@ function getBlockColor(block: TimeBlock): string {
 }
 
 .day-cell {
-  border-top: 1px solid var(--color-border-soft);
-  border-right: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
   padding: 8px;
   cursor: pointer;
-  background: rgba(255, 253, 248, 0.86);
+  background: rgba(20, 21, 23, 0.3);
   transition: background 0.2s ease;
 }
 
@@ -125,35 +126,37 @@ function getBlockColor(block: TimeBlock): string {
 }
 
 .day-cell:hover {
-  background: var(--color-primary-soft);
+  background: var(--color-surface-hover);
 }
 
 .day-cell.other-month {
-  background: #f4f2eb;
+  background: rgba(20, 21, 23, 0.15);
 }
 
 .day-cell.other-month .day-number {
-  color: var(--color-faint);
+  color: var(--color-text-tertiary);
+  opacity: 0.4;
 }
 
 .day-cell.today {
-  background: #edf7f4;
+  background: rgba(255, 107, 74, 0.06);
 }
 
 .day-number {
   display: inline-grid;
-  min-width: 24px;
-  height: 24px;
+  min-width: 26px;
+  height: 26px;
   place-items: center;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--color-text);
 }
 
 .today .day-number {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-weight: 700;
 }
 
 .day-events {
@@ -164,10 +167,11 @@ function getBlockColor(block: TimeBlock): string {
   font-size: 11px;
   padding: 3px 6px;
   margin-bottom: 3px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: white;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 </style>

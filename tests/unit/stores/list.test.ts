@@ -32,7 +32,14 @@ describe('List Store', () => {
   })
 
   it('creates a list through the API', async () => {
-    const list = { id: 2, board_id: 1, name: 'Doing', position: 2, created_at: new Date(), cards: [] }
+    const list = {
+      id: 2,
+      board_id: 1,
+      name: 'Doing',
+      position: 2,
+      created_at: new Date(),
+      cards: [],
+    }
     ;(apiClient.post as jest.Mock).mockResolvedValue(list)
 
     const store = useListStore()

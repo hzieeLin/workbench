@@ -7,7 +7,7 @@ describe('Comment Entity', () => {
     comment.card_id = 1
     comment.author = 'Test User'
     comment.content = 'Test comment'
-    
+
     expect(comment.id).toBe(1)
     expect(comment.card_id).toBe(1)
     expect(comment.author).toBe('Test User')
@@ -17,7 +17,7 @@ describe('Comment Entity', () => {
   it('should have created_at timestamp', () => {
     const comment = new Comment()
     comment.created_at = new Date()
-    
+
     expect(comment.created_at).toBeInstanceOf(Date)
   })
 })

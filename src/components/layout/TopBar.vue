@@ -1,12 +1,41 @@
 <template>
   <header class="topbar">
     <div class="search-box">
-      <span class="search-icon">⌕</span>
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5" />
+        <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
       <input type="text" placeholder="搜索任务..." v-model="searchQuery" />
+      <kbd class="search-hint">⌘K</kbd>
     </div>
     <div class="actions">
-      <button class="btn-icon" title="设置">⚙</button>
-      <button class="btn-icon" title="用户">人</button>
+      <button class="btn-icon" title="通知">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M8 1.5a5 5 0 00-5 5v2.5l-1 2.5h12l-1-2.5V6.5a5 5 0 00-5-5z"
+            stroke="currentColor"
+            stroke-width="1.4"
+          />
+          <path
+            d="M6 13a2 2 0 004 0"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button class="btn-icon" title="设置">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="2.25" stroke="currentColor" stroke-width="1.5" />
+          <path
+            d="M8 1v2M8 13v2M1 8h2M13 8h2M2.5 2.5l1.5 1.5M12 12l1.5 1.5M2.5 13.5l1.5-1.5M12 4l1.5-1.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+      <div class="avatar">U</div>
     </div>
   </header>
 </template>
@@ -19,19 +48,21 @@ const searchQuery = ref('')
 
 <style scoped>
 .topbar {
-  height: 62px;
-  background: rgba(255, 253, 248, 0.86);
-  border-bottom: 1px solid var(--color-border-soft);
+  height: 60px;
+  background: var(--color-surface-glass);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  backdrop-filter: blur(14px);
+  gap: 16px;
 }
 
 .search-box {
   position: relative;
-  width: min(420px, 42vw);
+  width: min(380px, 40vw);
 }
 
 .search-icon {
@@ -39,8 +70,8 @@ const searchQuery = ref('')
   top: 50%;
   left: 14px;
   transform: translateY(-50%);
-  color: var(--color-faint);
-  font-size: 18px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
 }
 
 .search-box input {
@@ -48,48 +79,70 @@ const searchQuery = ref('')
   height: 38px;
   padding: 8px 16px 8px 40px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   outline: none;
   background: var(--color-surface);
   color: var(--color-text);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
 }
 
 .search-box input::placeholder {
-  color: var(--color-faint);
+  color: var(--color-text-tertiary);
 }
 
 .search-box input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
+  background: var(--color-surface-elevated);
+}
+
+.search-hint {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  font-family: inherit;
+  line-height: 1.4;
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-icon {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--color-muted);
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+  transition: all 0.2s ease;
 }
 
 .btn-icon:hover {
-  background: var(--color-primary-soft);
-  border-color: rgba(36, 120, 106, 0.18);
-  color: var(--color-primary-strong);
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  margin-left: 4px;
 }
 </style>

@@ -80,7 +80,11 @@ export function createCardRouter(dataSource: DataSource) {
       const cardId = Number(req.params.id)
       const targetListId = Number(req.body.list_id)
       const targetPosition = Number(req.body.position)
-      if (!Number.isFinite(targetListId) || !Number.isFinite(targetPosition) || targetPosition < 1) {
+      if (
+        !Number.isFinite(targetListId) ||
+        !Number.isFinite(targetPosition) ||
+        targetPosition < 1
+      ) {
         return res.status(400).json({ error: 'Card move requires list_id and position' })
       }
       const allCards = await repo.find()

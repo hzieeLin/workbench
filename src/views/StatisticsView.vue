@@ -2,7 +2,7 @@
   <div class="statistics-view">
     <div class="stats-header">
       <div>
-        <p>统计分析</p>
+        <p class="eyebrow">统计分析</p>
         <h2>效率概览</h2>
       </div>
       <ExportButton @export="handleExport" />
@@ -65,6 +65,18 @@ function handleExport(format: 'csv' | 'json') {
 <style scoped>
 .statistics-view {
   height: 100%;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .stats-header {
@@ -72,19 +84,23 @@ function handleExport(format: 'csv' | 'json') {
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
-.stats-header p {
+.stats-header .eyebrow {
   margin-bottom: 6px;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .stats-header h2 {
+  font-family: var(--font-display);
   color: var(--color-text);
-  font-size: 26px;
+  font-size: 28px;
+  font-weight: 500;
 }
 
 .stats-grid {
@@ -94,17 +110,23 @@ function handleExport(format: 'csv' | 'json') {
 }
 
 .stat-card {
-  background: rgba(255, 253, 248, 0.86);
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: var(--shadow-soft);
+  background: var(--color-surface-glass);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+
+.stat-card:hover {
+  border-color: var(--color-border-hover);
 }
 
 .stat-card h3 {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   color: var(--color-text);
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .stat-card.full-width {

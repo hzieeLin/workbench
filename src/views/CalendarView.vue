@@ -108,6 +108,18 @@ function openCreateBlock(start: Date, end: Date) {
   height: 100%;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .calendar-content {

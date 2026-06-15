@@ -1,16 +1,14 @@
 <template>
   <div class="label-badges" v-if="labels.length">
-    <span 
-      v-for="label in displayLabels" 
-      :key="label.id" 
+    <span
+      v-for="label in displayLabels"
+      :key="label.id"
       class="label-badge"
       :style="{ backgroundColor: label.color }"
     >
       {{ label.name }}
     </span>
-    <span v-if="overflowCount > 0" class="label-badge overflow">
-      +{{ overflowCount }}
-    </span>
+    <span v-if="overflowCount > 0" class="label-badge overflow"> +{{ overflowCount }} </span>
   </div>
 </template>
 

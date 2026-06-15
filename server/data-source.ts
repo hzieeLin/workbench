@@ -25,6 +25,10 @@ export function createDataSource() {
     synchronize: false,
     logging: false,
     entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment],
-    migrations: [InitialSchema1710000000000, AddCommentsTable1710000000001, AddLabelBoardId1710000000002],
+    migrations: [
+      InitialSchema1710000000000,
+      AddCommentsTable1710000000001,
+      AddLabelBoardId1710000000002,
+    ],
   })
 }

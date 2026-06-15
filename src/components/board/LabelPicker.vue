@@ -4,16 +4,8 @@
       <input v-model="search" placeholder="搜索标签..." />
     </div>
     <div class="label-list">
-      <label 
-        v-for="label in filteredLabels" 
-        :key="label.id" 
-        class="label-option"
-      >
-        <input 
-          type="checkbox" 
-          :checked="isSelected(label.id)"
-          @change="toggleLabel(label.id)"
-        />
+      <label v-for="label in filteredLabels" :key="label.id" class="label-option">
+        <input type="checkbox" :checked="isSelected(label.id)" @change="toggleLabel(label.id)" />
         <span class="label-color" :style="{ backgroundColor: label.color }" />
         <span class="label-name">{{ label.name }}</span>
       </label>
@@ -39,7 +31,7 @@ const search = ref('')
 
 const filteredLabels = computed(() => {
   if (!search.value) return props.availableLabels
-  return props.availableLabels.filter(label => 
+  return props.availableLabels.filter((label) =>
     label.name.toLowerCase().includes(search.value.toLowerCase())
   )
 })
@@ -50,7 +42,7 @@ function isSelected(labelId: number) {
 
 function toggleLabel(labelId: number) {
   const newSelected = isSelected(labelId)
-    ? props.selectedLabels.filter(id => id !== labelId)
+    ? props.selectedLabels.filter((id) => id !== labelId)
     : [...props.selectedLabels, labelId]
   emit('update:selectedLabels', newSelected)
 }

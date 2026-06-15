@@ -9,14 +9,14 @@ describe('CommentSection', () => {
 
   it('renders comment list', () => {
     const wrapper = mount(CommentSection, {
-      props: { cardId: 1 }
+      props: { cardId: 1 },
     })
     expect(wrapper.find('.comment-section').exists()).toBe(true)
   })
 
   it('shows comment form', () => {
     const wrapper = mount(CommentSection, {
-      props: { cardId: 1 }
+      props: { cardId: 1 },
     })
     expect(wrapper.find('.comment-form').exists()).toBe(true)
   })

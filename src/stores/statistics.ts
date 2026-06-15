@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { AppDataSource } from '@/database/connection'
-import { Board } from '@/database/entities/Board'
-import { List } from '@/database/entities/List'
-import { Card } from '@/database/entities/Card'
-import { TimeBlock } from '@/database/entities/TimeBlock'
+import type { Board } from '@/database/entities/Board'
+import type { List } from '@/database/entities/List'
+import type { Card } from '@/database/entities/Card'
+import type { TimeBlock } from '@/database/entities/TimeBlock'
+import { apiClient } from '@/services/api'
 
 export interface DashboardStats {
   totalBoards: number
@@ -76,17 +76,17 @@ export const useStatisticsStore = defineStore('statistics', () => {
   })
 
   async function loadSnapshot() {
-    const boardRepo = AppDataSource.getRepository(Board)
-    const listRepo = AppDataSource.getRepository(List)
-    const cardRepo = AppDataSource.getRepository(Card)
-    const timeBlockRepo = AppDataSource.getRepository(TimeBlock)
+    const boards: Board[] = await apiClient.get<Board[]>('/boards')
 
-    const boards: Board[] = await boardRepo.find()
-    const lists: List[] = await listRepo.find()
-    const cards: Card[] = await cardRepo.find()
-    const timeBlocks: TimeBlock[] = await timeBlockRepo.find()
+    const listPromises = boards.map((board) => apiClient.get<List[]>(`/boards/${board.id}/lists`))
+    const listResults = await Promise.all(listPromises)
+    const lists: List[] = listResults.flat()
 
-    return { boards, lists, cards, timeBlocks }
+    const cardPromises = lists.map((list) => apiClient.get<Card[]>(`/lists/${list.id}/cards`))
+    const cardResults = await Promise.all(cardPromises)
+    const cards: Card[] = cardResults.flat()
+
+    return { boards, lists, cards, timeBlocks: [] as TimeBlock[] }
   }
 
   function getCompletedListIds(lists: List[]) {

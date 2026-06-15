@@ -1,12 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { useStatisticsStore } from '@/stores/statistics'
 
-jest.mock('@/database/connection', () => ({
-  AppDataSource: {
-    getRepository: jest.fn().mockReturnValue({
-      count: jest.fn().mockResolvedValue(0),
-      find: jest.fn().mockResolvedValue([]),
-    }),
+jest.mock('@/services/api', () => ({
+  apiClient: {
+    get: jest.fn().mockResolvedValue([]),
   },
 }))
 

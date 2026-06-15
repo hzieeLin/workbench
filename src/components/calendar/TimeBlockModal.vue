@@ -1,26 +1,29 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
-    <div class="modal">
-      <h3>创建时间块</h3>
-      <form @submit.prevent="handleSubmit">
-        <input v-model="title" placeholder="时间块标题" required />
-        <div class="time-inputs">
-          <label>
-            开始时间
-            <input type="datetime-local" v-model="startTime" required />
-          </label>
-          <label>
-            结束时间
-            <input type="datetime-local" v-model="endTime" required />
-          </label>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="secondary" @click="$emit('close')">取消</button>
-          <button type="submit" class="primary">创建</button>
-        </div>
-      </form>
+  <transition name="modal">
+    <div class="modal-overlay" @click.self="$emit('close')">
+      <div class="modal">
+        <div class="modal-handle" />
+        <h3>创建时间块</h3>
+        <form @submit.prevent="handleSubmit">
+          <input v-model="title" placeholder="时间块标题" required />
+          <div class="time-inputs">
+            <label>
+              开始时间
+              <input type="datetime-local" v-model="startTime" required />
+            </label>
+            <label>
+              结束时间
+              <input type="datetime-local" v-model="endTime" required />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" @click="$emit('close')">取消</button>
+            <button type="submit" class="btn-primary">创建</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
@@ -61,24 +64,71 @@ async function handleSubmit() {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(33, 50, 60, 0.24);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-enter-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-active .modal {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.modal-leave-active {
+  transition: all 0.2s ease;
+}
+
+.modal-leave-active .modal {
+  transition: all 0.2s ease;
+}
+
+.modal-enter-from {
+  opacity: 0;
+}
+
+.modal-enter-from .modal {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-leave-to .modal {
+  opacity: 0;
+  transform: scale(0.97) translateY(5px);
 }
 
 .modal {
   width: 420px;
   padding: 24px;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-elevated);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-handle {
+  width: 32px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-text-tertiary);
+  opacity: 0.3;
+  margin: 0 auto 16px;
 }
 
 .modal h3 {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
   color: var(--color-text);
 }
 
@@ -87,30 +137,39 @@ async function handleSubmit() {
   padding: 10px 12px;
   margin-bottom: 12px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   outline: none;
-  background: white;
+  background: var(--color-surface);
   color: var(--color-text);
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .modal input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
+  background: var(--color-surface-elevated);
+}
+
+.modal input::placeholder {
+  color: var(--color-text-tertiary);
 }
 
 .time-inputs {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .time-inputs label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .modal-actions {
@@ -122,21 +181,33 @@ async function handleSubmit() {
 
 .modal-actions button {
   min-height: 36px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
 }
 
-.secondary {
+.btn-secondary {
   border: 1px solid var(--color-border);
-  background: white;
-  color: var(--color-muted);
+  background: transparent;
+  color: var(--color-text-tertiary);
 }
 
-.primary {
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
-  color: white;
+.btn-secondary:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+}
+
+.btn-primary {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+  box-shadow: var(--shadow-glow);
 }
 </style>

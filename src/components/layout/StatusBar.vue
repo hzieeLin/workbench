@@ -1,7 +1,10 @@
 <template>
   <footer class="statusbar">
+    <div class="status-left">
+      <span class="status-indicator" />
+      <span>{{ taskCount }} 个任务</span>
+    </div>
     <span>{{ currentDate }}</span>
-    <span>{{ taskCount }} 个任务</span>
   </footer>
 </template>
 
@@ -25,14 +28,31 @@ const taskCount = computed(() => cardStore.cards.length)
 
 <style scoped>
 .statusbar {
-  height: 34px;
-  background: rgba(255, 253, 248, 0.88);
-  border-top: 1px solid var(--color-border-soft);
+  height: 32px;
+  background: var(--color-surface-glass);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border-top: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 20px;
   font-size: 12px;
-  color: var(--color-muted);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-green);
+  opacity: 0.8;
 }
 </style>

@@ -1,6 +1,8 @@
 type JsonBody = Record<string, unknown>
 
-export function getApiBase(protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:') {
+export function getApiBase(
+  protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:'
+) {
   if (protocol === 'file:') {
     return 'http://localhost:3001/api'
   }

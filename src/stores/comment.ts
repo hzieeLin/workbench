@@ -25,7 +25,7 @@ export const useCommentStore = defineStore('comment', () => {
     try {
       const comment = await apiClient.post<Comment>(`/cards/${cardId}/comments`, {
         content,
-        author
+        author,
       })
       comments.value.push(comment)
       return comment

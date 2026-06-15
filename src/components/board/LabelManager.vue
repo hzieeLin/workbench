@@ -77,8 +77,16 @@ const editName = ref('')
 const editColor = ref('')
 
 const presetColors = [
-  '#4AD9D9', '#F5A623', '#7ED321', '#4A90D9', '#BD10E0',
-  '#D0021B', '#F8E71C', '#50E3C2', '#B8E986', '#9B9B9B'
+  '#4AD9D9',
+  '#F5A623',
+  '#7ED321',
+  '#4A90D9',
+  '#BD10E0',
+  '#D0021B',
+  '#F8E71C',
+  '#50E3C2',
+  '#B8E986',
+  '#9B9B9B',
 ]
 
 onMounted(async () => {

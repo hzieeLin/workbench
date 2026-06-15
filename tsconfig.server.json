@@ -4,7 +4,7 @@
     "module": "commonjs",
     "lib": ["ES2020"],
     "outDir": "dist-server",
-    "rootDir": ".",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -14,5 +14,5 @@
     "emitDecoratorMetadata": true,
     "types": ["node", "jest"]
   },
-  "include": ["server/**/*.ts", "src/database/entities/**/*.ts", "src/database/migrations/**/*.ts"]
+  "include": ["server/**/*.ts", "src/database/**/*.ts"]
 }

@@ -28,13 +28,13 @@ export const useListStore = defineStore('list', () => {
 
   async function updateList(id: number, data: Partial<List>) {
     await apiClient.patch(`/lists/${id}`, data as Record<string, unknown>)
-    const i = lists.value.findIndex(l => l.id === id)
+    const i = lists.value.findIndex((l) => l.id === id)
     if (i !== -1) lists.value[i] = { ...lists.value[i], ...data }
   }
 
   async function deleteList(id: number) {
     await apiClient.delete(`/lists/${id}`)
-    lists.value = lists.value.filter(l => l.id !== id)
+    lists.value = lists.value.filter((l) => l.id !== id)
   }
 
   async function reorderLists(boardId: number, listIds: number[]) {

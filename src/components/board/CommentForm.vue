@@ -8,9 +8,7 @@
     />
     <div class="form-actions">
       <span class="hint">⌘ + Enter 发送</span>
-      <button @click="handleSubmit" :disabled="!content.trim()" class="btn-primary">
-        发送
-      </button>
+      <button @click="handleSubmit" :disabled="!content.trim()" class="btn-primary">发送</button>
     </div>
   </div>
 </template>

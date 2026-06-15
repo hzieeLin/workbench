@@ -30,7 +30,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "server:dev": "nodemon --watch server --watch src/database --ext ts --exec ts-node -P tsconfig.server.json server/index.ts",
+    "server:dev": "nodemon --watch server --watch src/database --ext ts --exec ts-node --transpile-only --project tsconfig.server.json server/index.ts",
     "server:build": "tsc -p tsconfig.server.json",
     "dev:full": "concurrently -k \"npm:server:dev\" \"npm:dev\"",
     "build:full": "npm run server:build && npm run build",
@@ -90,6 +90,7 @@
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vue-tsc": "^3.3.4",

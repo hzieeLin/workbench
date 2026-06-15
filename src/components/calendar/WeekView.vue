@@ -80,24 +80,26 @@ function handleSlotClick(day: Date, hour: number) {
   display: flex;
   height: 100%;
   overflow: auto;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-glass);
+  backdrop-filter: var(--blur-sm);
 }
 
 .time-column {
   width: 60px;
-  border-right: 1px solid var(--color-border-soft);
-  background: var(--color-surface-soft);
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  flex-shrink: 0;
 }
 
 .hour-label {
   height: 60px;
   padding: 4px 8px;
-  font-size: 12px;
-  color: var(--color-muted);
+  font-size: 11px;
+  color: var(--color-text-tertiary);
   text-align: right;
+  font-weight: 500;
 }
 
 .days-column {
@@ -107,30 +109,37 @@ function handleSlotClick(day: Date, hour: number) {
 
 .day-column {
   flex: 1;
-  border-right: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border);
   position: relative;
+}
+
+.day-column:last-child {
+  border-right: none;
 }
 
 .time-slot {
   height: 60px;
-  border-bottom: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border);
   position: relative;
+  transition: background 0.15s ease;
 }
 
 .time-slot:hover {
-  background: var(--color-primary-soft);
+  background: var(--color-surface-hover);
 }
 
 .time-block {
   position: absolute;
-  left: 4px;
-  right: 4px;
-  background: var(--color-primary);
-  color: white;
-  padding: 5px 6px;
-  border-radius: 8px;
-  font-size: 12px;
+  left: 3px;
+  right: 3px;
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
   overflow: hidden;
-  box-shadow: 0 8px 14px rgba(36, 120, 106, 0.16);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 </style>
