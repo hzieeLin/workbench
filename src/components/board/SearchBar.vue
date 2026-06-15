@@ -4,14 +4,15 @@
       <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5" />
       <path d="M11 11l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
     </svg>
-    <input 
-      v-model="search" 
-      placeholder="搜索卡片..."
-      @input="handleSearch"
-    />
+    <input v-model="search" placeholder="搜索卡片..." @input="handleSearch" />
     <button v-if="search" @click="clearSearch" class="clear-btn">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <path
+          d="M2 2l8 8M10 2l-8 8"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
       </svg>
     </button>
     <span v-if="resultCount !== null && resultCount !== undefined" class="result-count">
@@ -45,6 +46,15 @@ function clearSearch() {
   search.value = ''
   emit('search', '')
 }
+
+function highlightText(text: string, query: string): string {
+  if (!query || !text) return text
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escaped})`, 'gi')
+  return text.replace(regex, '<mark class="search-highlight">$1</mark>')
+}
+
+defineExpose({ highlightText })
 </script>
 
 <style scoped>
@@ -98,5 +108,14 @@ function clearSearch() {
   font-size: 12px;
   color: var(--color-text-tertiary);
   white-space: nowrap;
+}
+</style>
+
+<style>
+mark.search-highlight {
+  background: rgba(99, 102, 241, 0.25);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
 }
 </style>
