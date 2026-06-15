@@ -7,6 +7,7 @@ import { createApp } from '../../server/app'
 import { Board } from '../../src/database/entities/Board'
 import { Card } from '../../src/database/entities/Card'
 import { Comment } from '../../src/database/entities/Comment'
+import { CardLabel } from '../../src/database/entities/CardLabel'
 import { Label } from '../../src/database/entities/Label'
 import { List } from '../../src/database/entities/List'
 
@@ -71,6 +72,7 @@ describe('Comment API', () => {
         if (entity === Card) return cardRepo
         if (entity === Comment) return commentRepo
         if (entity === Label) return createRepo<any>()
+        if (entity === CardLabel) return createRepo<any>()
         throw new Error('Unexpected repository')
       },
     } as any
