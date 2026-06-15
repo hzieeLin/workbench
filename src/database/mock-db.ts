@@ -30,7 +30,7 @@ export const mockDB = {
     findOne(options?: { where?: { id?: number } }): Board | null {
       const boards = getStorage<Board>('db_boards')
       if (options?.where?.id) {
-        return boards.find(b => b.id === options.where!.id) || null
+        return boards.find((b) => b.id === options.where!.id) || null
       }
       return boards[0] || null
     },
@@ -50,7 +50,7 @@ export const mockDB = {
     },
     async save(board: Board): Promise<Board> {
       const boards = getStorage<Board>('db_boards')
-      const index = boards.findIndex(b => b.id === board.id)
+      const index = boards.findIndex((b) => b.id === board.id)
       if (index >= 0) {
         boards[index] = { ...boards[index], ...board, updated_at: new Date() }
       } else {
@@ -61,7 +61,7 @@ export const mockDB = {
     },
     async update(id: number, data: Partial<Board>): Promise<void> {
       const boards = getStorage<Board>('db_boards')
-      const index = boards.findIndex(b => b.id === id)
+      const index = boards.findIndex((b) => b.id === id)
       if (index >= 0) {
         boards[index] = { ...boards[index], ...data, updated_at: new Date() }
         setStorage('db_boards', boards)
@@ -69,7 +69,10 @@ export const mockDB = {
     },
     async delete(id: number): Promise<void> {
       const boards = getStorage<Board>('db_boards')
-      setStorage('db_boards', boards.filter(b => b.id !== id))
+      setStorage(
+        'db_boards',
+        boards.filter((b) => b.id !== id)
+      )
     },
   },
 
@@ -77,7 +80,7 @@ export const mockDB = {
     find(options?: { where?: { board_id?: number }; order?: { position?: string } }): List[] {
       let lists = getStorage<List>('db_lists')
       if (options?.where?.board_id) {
-        lists = lists.filter(l => l.board_id === options.where!.board_id)
+        lists = lists.filter((l) => l.board_id === options.where!.board_id)
       }
       if (options?.order?.position === 'ASC') {
         lists.sort((a, b) => a.position - b.position)
@@ -101,7 +104,7 @@ export const mockDB = {
     },
     async save(list: List): Promise<List> {
       const lists = getStorage<List>('db_lists')
-      const index = lists.findIndex(l => l.id === list.id)
+      const index = lists.findIndex((l) => l.id === list.id)
       if (index >= 0) {
         lists[index] = { ...lists[index], ...list }
       } else {
@@ -112,7 +115,7 @@ export const mockDB = {
     },
     async update(id: number, data: Partial<List>): Promise<void> {
       const lists = getStorage<List>('db_lists')
-      const index = lists.findIndex(l => l.id === id)
+      const index = lists.findIndex((l) => l.id === id)
       if (index >= 0) {
         lists[index] = { ...lists[index], ...data }
         setStorage('db_lists', lists)
@@ -120,18 +123,24 @@ export const mockDB = {
     },
     async delete(id: number): Promise<void> {
       const lists = getStorage<List>('db_lists')
-      setStorage('db_lists', lists.filter(l => l.id !== id))
+      setStorage(
+        'db_lists',
+        lists.filter((l) => l.id !== id)
+      )
     },
   },
 
   cards: {
-    find(options?: { where?: { list_id?: number; id?: number }; order?: { position?: string } }): Card[] {
+    find(options?: {
+      where?: { list_id?: number; id?: number }
+      order?: { position?: string }
+    }): Card[] {
       let cards = getStorage<Card>('db_cards')
       if (options?.where?.list_id) {
-        cards = cards.filter(c => c.list_id === options.where!.list_id)
+        cards = cards.filter((c) => c.list_id === options.where!.list_id)
       }
       if (options?.where?.id) {
-        cards = cards.filter(c => c.id === options.where!.id)
+        cards = cards.filter((c) => c.id === options.where!.id)
       }
       if (options?.order?.position === 'ASC') {
         cards.sort((a, b) => a.position - b.position)
@@ -152,6 +161,7 @@ export const mockDB = {
         list: undefined,
         cardLabels: [],
         timeBlocks: [],
+        comments: [],
       }
       const cards = getStorage<Card>('db_cards')
       cards.push(card)
@@ -160,7 +170,7 @@ export const mockDB = {
     },
     async save(card: Card): Promise<Card> {
       const cards = getStorage<Card>('db_cards')
-      const index = cards.findIndex(c => c.id === card.id)
+      const index = cards.findIndex((c) => c.id === card.id)
       if (index >= 0) {
         cards[index] = { ...cards[index], ...card, updated_at: new Date() }
       } else {
@@ -171,7 +181,7 @@ export const mockDB = {
     },
     async update(id: number, data: Partial<Card>): Promise<void> {
       const cards = getStorage<Card>('db_cards')
-      const index = cards.findIndex(c => c.id === id)
+      const index = cards.findIndex((c) => c.id === id)
       if (index >= 0) {
         cards[index] = { ...cards[index], ...data, updated_at: new Date() }
         setStorage('db_cards', cards)
@@ -179,15 +189,18 @@ export const mockDB = {
     },
     async delete(id: number): Promise<void> {
       const cards = getStorage<Card>('db_cards')
-      setStorage('db_cards', cards.filter(c => c.id !== id))
+      setStorage(
+        'db_cards',
+        cards.filter((c) => c.id !== id)
+      )
     },
     async count(options?: { where?: { list_id?: number; priority?: string } }): Promise<number> {
       let cards = getStorage<Card>('db_cards')
       if (options?.where?.list_id) {
-        cards = cards.filter(c => c.list_id === options.where!.list_id)
+        cards = cards.filter((c) => c.list_id === options.where!.list_id)
       }
       if (options?.where?.priority) {
-        cards = cards.filter(c => c.priority === options.where!.priority)
+        cards = cards.filter((c) => c.priority === options.where!.priority)
       }
       return cards.length
     },
@@ -211,7 +224,7 @@ export const mockDB = {
     },
     async save(label: Label): Promise<Label> {
       const labels = getStorage<Label>('db_labels')
-      const index = labels.findIndex(l => l.id === label.id)
+      const index = labels.findIndex((l) => l.id === label.id)
       if (index >= 0) {
         labels[index] = { ...labels[index], ...label }
       } else {
@@ -222,7 +235,7 @@ export const mockDB = {
     },
     async update(id: number, data: Partial<Label>): Promise<void> {
       const labels = getStorage<Label>('db_labels')
-      const index = labels.findIndex(l => l.id === id)
+      const index = labels.findIndex((l) => l.id === id)
       if (index >= 0) {
         labels[index] = { ...labels[index], ...data }
         setStorage('db_labels', labels)
@@ -230,7 +243,10 @@ export const mockDB = {
     },
     async delete(id: number): Promise<void> {
       const labels = getStorage<Label>('db_labels')
-      setStorage('db_labels', labels.filter(l => l.id !== id))
+      setStorage(
+        'db_labels',
+        labels.filter((l) => l.id !== id)
+      )
     },
   },
 
@@ -238,7 +254,7 @@ export const mockDB = {
     find(options?: { where?: { card_id?: number } }): TimeBlock[] {
       let blocks = getStorage<TimeBlock>('db_timeblocks')
       if (options?.where?.card_id) {
-        blocks = blocks.filter(b => b.card_id === options.where!.card_id)
+        blocks = blocks.filter((b) => b.card_id === options.where!.card_id)
       }
       return blocks
     },
@@ -257,7 +273,7 @@ export const mockDB = {
     },
     async save(block: TimeBlock): Promise<TimeBlock> {
       const blocks = getStorage<TimeBlock>('db_timeblocks')
-      const index = blocks.findIndex(b => b.id === block.id)
+      const index = blocks.findIndex((b) => b.id === block.id)
       if (index >= 0) {
         blocks[index] = { ...blocks[index], ...block }
       } else {
@@ -268,7 +284,7 @@ export const mockDB = {
     },
     async update(id: number, data: Partial<TimeBlock>): Promise<void> {
       const blocks = getStorage<TimeBlock>('db_timeblocks')
-      const index = blocks.findIndex(b => b.id === id)
+      const index = blocks.findIndex((b) => b.id === id)
       if (index >= 0) {
         blocks[index] = { ...blocks[index], ...data }
         setStorage('db_timeblocks', blocks)
@@ -276,7 +292,10 @@ export const mockDB = {
     },
     async delete(id: number): Promise<void> {
       const blocks = getStorage<TimeBlock>('db_timeblocks')
-      setStorage('db_timeblocks', blocks.filter(b => b.id !== id))
+      setStorage(
+        'db_timeblocks',
+        blocks.filter((b) => b.id !== id)
+      )
     },
   },
 }

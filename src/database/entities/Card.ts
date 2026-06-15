@@ -47,4 +47,7 @@ export class Card {
 
   @OneToMany('TimeBlock', (timeBlock: any) => timeBlock.card)
   timeBlocks!: any[]
+
+  @OneToMany('Comment', (comment: any) => comment.card)
+  comments!: any[]
 }

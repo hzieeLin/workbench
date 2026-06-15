@@ -23,7 +23,9 @@ function save<T>(key: string, data: T[]) {
 
 export const db = {
   boards: {
-    find(): Board[] { return load<Board>('b') },
+    find(): Board[] {
+      return load<Board>('b')
+    },
     create(d: Partial<Board>): Board {
       const b: Board = {
         id: genId(),
@@ -47,7 +49,10 @@ export const db = {
       }
     },
     async delete(id: number) {
-      save('b', load<Board>('b').filter((x) => x.id !== id))
+      save(
+        'b',
+        load<Board>('b').filter((x) => x.id !== id)
+      )
     },
   },
   lists: {
@@ -80,7 +85,10 @@ export const db = {
       }
     },
     async delete(id: number) {
-      save('l', load<List>('l').filter((x) => x.id !== id))
+      save(
+        'l',
+        load<List>('l').filter((x) => x.id !== id)
+      )
     },
   },
   cards: {
@@ -103,6 +111,7 @@ export const db = {
         list: undefined,
         cardLabels: [],
         timeBlocks: [],
+        comments: [],
       }
       const all = load<Card>('c')
       all.push(c)
@@ -118,7 +127,10 @@ export const db = {
       }
     },
     async delete(id: number) {
-      save('c', load<Card>('c').filter((x) => x.id !== id))
+      save(
+        'c',
+        load<Card>('c').filter((x) => x.id !== id)
+      )
     },
     async moveCard(cardId: number, targetListId: number, position: number) {
       const all = load<Card>('c')
@@ -160,7 +172,9 @@ export const db = {
     },
   },
   labels: {
-    find(): Label[] { return load<Label>('lb') },
+    find(): Label[] {
+      return load<Label>('lb')
+    },
     create(d: Partial<Label>): Label {
       const l: Label = {
         id: genId(),
@@ -182,13 +196,24 @@ export const db = {
       }
     },
     async delete(id: number) {
-      save('lb', load<Label>('lb').filter((x) => x.id !== id))
+      save(
+        'lb',
+        load<Label>('lb').filter((x) => x.id !== id)
+      )
     },
   },
   timeBlocks: {
-    find(): TimeBlock[] { return load<TimeBlock>('tb') },
+    find(): TimeBlock[] {
+      return load<TimeBlock>('tb')
+    },
     create(d: Partial<TimeBlock>): TimeBlock {
-      const t: TimeBlock = { id: genId(), card_id: d.card_id, start_time: d.start_time || new Date(), end_time: d.end_time || new Date(), title: d.title || '' }
+      const t: TimeBlock = {
+        id: genId(),
+        card_id: d.card_id,
+        start_time: d.start_time || new Date(),
+        end_time: d.end_time || new Date(),
+        title: d.title || '',
+      }
       const all = load<TimeBlock>('tb')
       all.push(t)
       save('tb', all)
@@ -203,7 +228,10 @@ export const db = {
       }
     },
     async delete(id: number) {
-      save('tb', load<TimeBlock>('tb').filter((x) => x.id !== id))
+      save(
+        'tb',
+        load<TimeBlock>('tb').filter((x) => x.id !== id)
+      )
     },
   },
 }

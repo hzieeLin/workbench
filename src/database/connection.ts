@@ -8,7 +8,9 @@ import { CardLabel } from './entities/CardLabel'
 import { TimeBlock } from './entities/TimeBlock'
 import { CalendarEvent } from './entities/CalendarEvent'
 import { ActivityLog } from './entities/ActivityLog'
+import { Comment } from './entities/Comment'
 import { InitialSchema1710000000000 } from './migrations/InitialSchema'
+import { AddCommentsTable1710000000001 } from './migrations/AddCommentsTable'
 
 const isBrowser = typeof window !== 'undefined'
 
@@ -51,7 +53,9 @@ export function getDataSource(): DataSource {
   if (_dataSource) return _dataSource
 
   if (isBrowser) {
-    throw new Error('Database cannot be accessed from browser. Use IPC to communicate with main process.')
+    throw new Error(
+      'Database cannot be accessed from browser. Use IPC to communicate with main process.'
+    )
   }
 
   const env = typeof process !== 'undefined' ? process.env : {}
@@ -65,8 +69,8 @@ export function getDataSource(): DataSource {
     database: env.DB_DATABASE ?? 'task_orchestrator',
     synchronize: false,
     logging: false,
-    entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog],
-    migrations: [InitialSchema1710000000000],
+    entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment],
+    migrations: [InitialSchema1710000000000, AddCommentsTable1710000000001],
     subscribers: [],
   })
 
@@ -86,4 +90,4 @@ export async function initializeDatabase() {
   }
 }
 
-export { Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog }
+export { Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment }
