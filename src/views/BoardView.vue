@@ -29,6 +29,11 @@
         :available-labels="availableLabels" 
         @filter="handleFilter" 
       />
+      <SortSelector 
+        :current-sort="sortField" 
+        :direction="sortDirection" 
+        @sort="handleSort" 
+      />
       <ActiveFilters 
         v-if="hasActiveFilters"
         :filters="activeFilters" 
@@ -99,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import { useListStore } from '@/stores/list'
 import { useCardStore } from '@/stores/card'
@@ -110,6 +115,7 @@ import CardDetailModal from '@/components/board/CardDetailModal.vue'
 import SearchBar from '@/components/board/SearchBar.vue'
 import FilterPanel from '@/components/board/FilterPanel.vue'
 import ActiveFilters from '@/components/board/ActiveFilters.vue'
+import SortSelector from '@/components/board/SortSelector.vue'
 import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
 import ListView from '@/components/board/ListView.vue'
 import CalendarView from '@/components/board/CalendarView.vue'
@@ -142,6 +148,15 @@ const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[
   due: [],
   labels: []
 })
+const sortField = ref('created_at')
+const sortDirection = ref('desc')
+
+onMounted(() => {
+  const savedSortField = localStorage.getItem('sortField')
+  const savedSortDirection = localStorage.getItem('sortDirection')
+  if (savedSortField) sortField.value = savedSortField
+  if (savedSortDirection) sortDirection.value = savedSortDirection
+})
 
 const filteredCardsCount = computed(() => {
   // This will be implemented when the card filtering logic is added
@@ -169,6 +184,13 @@ function handleFilter(filters: { priorities: string[]; due: string[]; labels: nu
 
 function updateFilters(filters: { priorities: string[]; due: string[]; labels: number[] }) {
   activeFilters.value = filters
+}
+
+function handleSort(field: string, direction: string) {
+  sortField.value = field
+  sortDirection.value = direction
+  localStorage.setItem('sortField', field)
+  localStorage.setItem('sortDirection', direction)
 }
 
 watch(currentBoard, async (board) => {
