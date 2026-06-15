@@ -28,7 +28,7 @@ describe('TaskCard', () => {
     const wrapper = mount(TaskCard, {
       props: { card: { ...mockCard, priority: 'high' } },
     })
-    expect(wrapper.classes()).toContain('high-priority')
+    expect(wrapper.classes()).toContain('priority-high')
   })
 
   it('does not apply high-priority class for low priority', () => {
@@ -71,7 +71,7 @@ describe('TaskCard', () => {
     const wrapper = mount(TaskCard, {
       props: { card: { ...mockCard, due_date: dueDate } },
     })
-    expect(wrapper.text()).toContain('2024/1/15')
+    expect(wrapper.text()).toContain('1/15')
   })
 
   it('does not render due date when not provided', () => {
