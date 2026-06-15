@@ -1,46 +1,81 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
-    <div class="modal large">
-      <div class="modal-header">
-        <h3>{{ card.title }}</h3>
-        <button class="btn-icon" @click="$emit('close')">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>标题</label>
-          <input v-model="editTitle" />
+  <transition name="modal">
+    <div class="modal-overlay" @click.self="$emit('close')">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-handle" />
+          <h3>{{ card.title }}</h3>
+          <button class="btn-close" @click="$emit('close')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M2 2l10 10M12 2l-10 10"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
         </div>
-        <div class="form-group">
-          <label>描述</label>
-          <textarea v-model="editDescription"></textarea>
-        </div>
-        <div class="form-grid">
+        <div class="modal-body">
           <div class="form-group">
-            <label>优先级</label>
-            <select v-model="editPriority">
-              <option value="low">低</option>
-              <option value="medium">中</option>
-              <option value="high">高</option>
-            </select>
+            <label>标题</label>
+            <input v-model="editTitle" />
           </div>
           <div class="form-group">
-            <label>截止日期</label>
-            <input type="date" v-model="editDueDate" />
+            <label>描述</label>
+            <textarea v-model="editDescription" placeholder="添加描述..."></textarea>
           </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>优先级</label>
+              <div class="select-wrapper">
+                <select v-model="editPriority">
+                  <option value="low">低</option>
+                  <option value="medium">中</option>
+                  <option value="high">高</option>
+                </select>
+                <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M3 5l3 3 3-3"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>截止日期</label>
+              <input type="date" v-model="editDueDate" />
+            </div>
+          </div>
+
+          <CommentSection :card-id="card.id" />
         </div>
-      </div>
-      <div class="modal-footer">
-        <button @click="handleDelete" class="danger">删除</button>
-        <button @click="handleSave" class="primary">保存</button>
+        <div class="modal-footer">
+          <button @click="handleDelete" class="btn-danger">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M2 4h10M5 4V2.5a1 1 0 011-1h2a1 1 0 011 1V4M11 4v7.5a1 1 0 01-1 1H4a1 1 0 01-1-1V4"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>删除</span>
+          </button>
+          <button @click="handleSave" class="btn-primary">保存</button>
+        </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Card } from '@/database/entities/Card'
 import { useCardStore } from '@/stores/card'
+import CommentSection from './CommentSection.vue'
 
 const props = defineProps<{
   card: Card
@@ -82,52 +117,101 @@ async function handleDelete() {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(33, 50, 60, 0.24);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-enter-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-active .modal {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.modal-leave-active {
+  transition: all 0.2s ease;
+}
+
+.modal-leave-active .modal {
+  transition: all 0.2s ease;
+}
+
+.modal-enter-from {
+  opacity: 0;
+}
+
+.modal-enter-from .modal {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-leave-to .modal {
+  opacity: 0;
+  transform: scale(0.97) translateY(5px);
 }
 
 .modal {
-  width: 500px;
+  width: 540px;
   max-height: 82vh;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-elevated);
+  box-shadow: var(--shadow-lg);
 }
 
-.modal.large {
-  width: 620px;
+.modal-handle {
+  width: 32px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-text-tertiary);
+  opacity: 0.3;
+  margin: 0 auto 10px;
 }
 
 .modal-header {
+  padding: 20px 24px 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--color-border-soft);
+  justify-content: space-between;
 }
 
 .modal-header h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.btn-close {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-close:hover {
+  background: var(--color-surface-hover);
   color: var(--color-text);
 }
 
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  color: var(--color-muted);
-}
-
 .modal-body {
-  padding: 20px;
+  padding: 20px 24px;
   overflow-y: auto;
 }
 
@@ -144,59 +228,117 @@ async function handleDelete() {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group textarea {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   outline: none;
-  background: white;
+  background: var(--color-surface);
   color: var(--color-text);
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  border-color: var(--color-primary);
+.form-group textarea:focus {
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
+  background: var(--color-surface-elevated);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--color-text-tertiary);
 }
 
 .form-group textarea {
-  height: 128px;
+  height: 120px;
   resize: vertical;
+  line-height: 1.6;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  width: 100%;
+  padding: 10px 32px 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select-wrapper select:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring);
+  background: var(--color-surface-elevated);
+}
+
+.select-chevron {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
 }
 
 .modal-footer {
-  padding: 16px 20px;
-  border-top: 1px solid var(--color-border-soft);
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .modal-footer button {
-  min-height: 36px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
 }
 
-.primary {
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
-  color: white;
+.btn-primary {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
 }
 
-.danger {
-  border: 1px solid var(--color-red-soft);
+.btn-primary:hover {
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-danger {
+  border: 1px solid transparent;
   background: var(--color-red-soft);
   color: var(--color-red);
+}
+
+.btn-danger:hover {
+  background: rgba(255, 94, 94, 0.22);
 }
 </style>
