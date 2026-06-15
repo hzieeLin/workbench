@@ -56,6 +56,7 @@
         v-else-if="currentView === 'calendar'"
         :cards="allCards"
         @edit="openCardDetail"
+        @update="handleCardUpdate"
       />
       <TimelineView
         v-else-if="currentView === 'timeline'"
@@ -101,6 +102,7 @@
 import { ref, computed, watch } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import { useListStore } from '@/stores/list'
+import { useCardStore } from '@/stores/card'
 import { Card } from '@/database/entities/Card'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
@@ -115,6 +117,7 @@ import TimelineView from '@/components/board/TimelineView.vue'
 
 const boardStore = useBoardStore()
 const listStore = useListStore()
+const cardStore = useCardStore()
 
 const showCreateList = ref(false)
 const selectedCard = ref<Card | null>(null)
@@ -181,6 +184,10 @@ function openCardDetail(card: Card) {
 function deleteCard(id: number) {
   // TODO: implement card deletion
   console.log('Delete card:', id)
+}
+
+async function handleCardUpdate(card: Card, newDate: string) {
+  await cardStore.updateCard(card.id, { due_date: new Date(newDate) })
 }
 </script>
 
