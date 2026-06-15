@@ -11,7 +11,7 @@ export class AddCommentsTable1710000000001 implements MigrationInterface {
         author VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (card_id) REFERENCES cards(id)
+        FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
       )
     `)
     await queryRunner.query(`CREATE INDEX idx_comments_card_id ON comments(card_id)`)

@@ -3,6 +3,7 @@ import type { List } from './entities/List'
 import type { Card } from './entities/Card'
 import type { Label } from './entities/Label'
 import type { TimeBlock } from './entities/TimeBlock'
+import type { Comment } from './entities/Comment'
 
 const isBrowser = typeof window !== 'undefined'
 
@@ -295,6 +296,63 @@ export const mockDB = {
       setStorage(
         'db_timeblocks',
         blocks.filter((b) => b.id !== id)
+      )
+    },
+  },
+
+  comments: {
+    find(options?: { where?: { card_id?: number } }): Comment[] {
+      let comments = getStorage<Comment>('db_comments')
+      if (options?.where?.card_id) {
+        comments = comments.filter((c) => c.card_id === options.where!.card_id)
+      }
+      return comments
+    },
+    findOne(options?: { where?: { id?: number } }): Comment | null {
+      const comments = getStorage<Comment>('db_comments')
+      if (options?.where?.id) {
+        return comments.find((c) => c.id === options.where!.id) || null
+      }
+      return comments[0] || null
+    },
+    create(data: Partial<Comment>): Comment {
+      const comment: Comment = {
+        id: generateId(),
+        card_id: data.card_id || 0,
+        author: data.author || '',
+        content: data.content || '',
+        created_at: new Date(),
+        card: undefined,
+      }
+      const comments = getStorage<Comment>('db_comments')
+      comments.push(comment)
+      setStorage('db_comments', comments)
+      return comment
+    },
+    async save(comment: Comment): Promise<Comment> {
+      const comments = getStorage<Comment>('db_comments')
+      const index = comments.findIndex((c) => c.id === comment.id)
+      if (index >= 0) {
+        comments[index] = { ...comments[index], ...comment }
+      } else {
+        comments.push(comment)
+      }
+      setStorage('db_comments', comments)
+      return comment
+    },
+    async update(id: number, data: Partial<Comment>): Promise<void> {
+      const comments = getStorage<Comment>('db_comments')
+      const index = comments.findIndex((c) => c.id === id)
+      if (index >= 0) {
+        comments[index] = { ...comments[index], ...data }
+        setStorage('db_comments', comments)
+      }
+    },
+    async delete(id: number): Promise<void> {
+      const comments = getStorage<Comment>('db_comments')
+      setStorage(
+        'db_comments',
+        comments.filter((c) => c.id !== id)
       )
     },
   },
