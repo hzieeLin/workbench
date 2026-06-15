@@ -51,7 +51,7 @@
       />
       <ListView
         v-else-if="currentView === 'list'"
-        :cards="allCards"
+        :cards="sortedCards"
         :lists="lists"
         :card-labels="cardLabels"
         @edit="openCardDetail"
@@ -59,13 +59,13 @@
       />
       <CalendarView
         v-else-if="currentView === 'calendar'"
-        :cards="allCards"
+        :cards="sortedCards"
         @edit="openCardDetail"
         @update="handleCardUpdate"
       />
       <TimelineView
         v-else-if="currentView === 'timeline'"
-        :cards="allCards"
+        :cards="sortedCards"
         @edit="openCardDetail"
       />
     </div>
@@ -148,14 +148,42 @@ const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[
   due: [],
   labels: []
 })
-const sortField = ref('created_at')
-const sortDirection = ref('desc')
+const sortField = ref<'created_at' | 'updated_at' | 'priority' | 'due_date' | 'title'>('created_at')
+const sortDirection = ref<'asc' | 'desc'>('desc')
+
+const sortedCards = computed(() => {
+  const cards = [...allCards.value]
+  const field = sortField.value
+  const dir = sortDirection.value === 'asc' ? 1 : -1
+
+  cards.sort((a, b) => {
+    const aVal = a[field]
+    const bVal = b[field]
+
+    if (aVal == null && bVal == null) return 0
+    if (aVal == null) return 1
+    if (bVal == null) return -1
+
+    if (field === 'priority') {
+      const priorityOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 }
+      return ((priorityOrder[bVal as string] ?? 4) - (priorityOrder[aVal as string] ?? 4)) * dir
+    }
+
+    if (field === 'due_date' || field === 'created_at' || field === 'updated_at') {
+      return (new Date(aVal).getTime() - new Date(bVal).getTime()) * dir
+    }
+
+    return String(aVal).localeCompare(String(bVal)) * dir
+  })
+
+  return cards
+})
 
 onMounted(() => {
   const savedSortField = localStorage.getItem('sortField')
   const savedSortDirection = localStorage.getItem('sortDirection')
-  if (savedSortField) sortField.value = savedSortField
-  if (savedSortDirection) sortDirection.value = savedSortDirection
+  if (savedSortField) sortField.value = savedSortField as typeof sortField.value
+  if (savedSortDirection) sortDirection.value = savedSortDirection as typeof sortDirection.value
 })
 
 const filteredCardsCount = computed(() => {
@@ -187,8 +215,8 @@ function updateFilters(filters: { priorities: string[]; due: string[]; labels: n
 }
 
 function handleSort(field: string, direction: string) {
-  sortField.value = field
-  sortDirection.value = direction
+  sortField.value = field as typeof sortField.value
+  sortDirection.value = direction as typeof sortDirection.value
   localStorage.setItem('sortField', field)
   localStorage.setItem('sortDirection', direction)
 }

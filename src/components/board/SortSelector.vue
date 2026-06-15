@@ -1,6 +1,6 @@
 <template>
   <div class="sort-selector">
-    <select v-model="selectedSort" @change="emitSort">
+    <select v-model="selectedSort">
       <option value="created_at">创建时间</option>
       <option value="updated_at">更新时间</option>
       <option value="priority">优先级</option>
@@ -18,7 +18,7 @@ import { ref, watch } from 'vue'
 
 const props = defineProps<{
   currentSort: string
-  direction: string
+  direction: 'asc' | 'desc'
 }>()
 
 const emit = defineEmits<{
@@ -31,9 +31,9 @@ watch(() => props.currentSort, (newVal) => {
   selectedSort.value = newVal
 })
 
-function emitSort() {
-  emit('sort', selectedSort.value, props.direction)
-}
+watch(selectedSort, (newVal) => {
+  emit('sort', newVal, props.direction)
+})
 
 function toggleDirection() {
   const newDirection = props.direction === 'asc' ? 'desc' : 'asc'
