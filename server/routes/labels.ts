@@ -1,10 +1,17 @@
 import { Router } from 'express'
 import type { DataSource } from 'typeorm'
+import { In } from 'typeorm'
 import { Label } from '../../src/database/entities/Label'
+import { CardLabel } from '../../src/database/entities/CardLabel'
+import { Card } from '../../src/database/entities/Card'
+import { List } from '../../src/database/entities/List'
 
 export function createLabelRouter(dataSource: DataSource) {
   const router = Router()
   const repo = dataSource.getRepository(Label)
+  const cardLabelRepo = dataSource.getRepository(CardLabel)
+  const cardRepo = dataSource.getRepository(Card)
+  const listRepo = dataSource.getRepository(List)
 
   router.get('/boards/:boardId/labels', async (req, res, next) => {
     try {
@@ -14,6 +21,34 @@ export function createLabelRouter(dataSource: DataSource) {
           order: { id: 'ASC' },
         })
       )
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  router.get('/boards/:boardId/card-labels', async (req, res, next) => {
+    try {
+      const boardId = Number(req.params.boardId)
+      const lists = await listRepo.find({ where: { board_id: boardId } })
+      const listIds = lists.map((l) => l.id)
+      if (listIds.length === 0) return res.json({})
+
+      const cards = await cardRepo.find({ where: { list_id: In(listIds) } })
+      const cardIds = cards.map((c) => c.id)
+      if (cardIds.length === 0) return res.json({})
+
+      const cardLabels = await cardLabelRepo
+        .createQueryBuilder('cl')
+        .innerJoinAndSelect('cl.label', 'label')
+        .where('cl.card_id IN (:...cardIds)', { cardIds })
+        .getMany()
+
+      const result: Record<number, Label[]> = {}
+      for (const cl of cardLabels) {
+        if (!result[cl.card_id]) result[cl.card_id] = []
+        result[cl.card_id].push(cl.label)
+      }
+      res.json(result)
     } catch (error) {
       next(error)
     }

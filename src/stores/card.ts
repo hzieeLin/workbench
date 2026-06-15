@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Card } from '@/database/entities/Card'
 import type { List } from '@/database/entities/List'
+import type { Label } from '@/database/entities/Label'
 import { apiClient } from '@/services/api'
 
 export const useCardStore = defineStore('card', () => {
   const cards = ref<Card[]>([])
+  const cardLabels = ref<Map<number, Label[]>>(new Map())
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -51,7 +53,9 @@ export const useCardStore = defineStore('card', () => {
         description,
       })
       cards.value.push(card)
-      cards.value = [...cards.value].sort((a, b) => a.list_id - b.list_id || a.position - b.position)
+      cards.value = [...cards.value].sort(
+        (a, b) => a.list_id - b.list_id || a.position - b.position
+      )
       return card
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
@@ -87,6 +91,10 @@ export const useCardStore = defineStore('card', () => {
     }
   }
 
+  function removeCardsByList(listId: number) {
+    cards.value = cards.value.filter((c) => c.list_id !== listId)
+  }
+
   async function moveCard(cardId: number, targetListId: number, position: number) {
     error.value = null
     try {
@@ -94,7 +102,9 @@ export const useCardStore = defineStore('card', () => {
       const index = cards.value.findIndex((card) => card.id === cardId)
       if (index !== -1) {
         cards.value[index] = { ...cards.value[index], list_id: targetListId, position }
-        cards.value = [...cards.value].sort((a, b) => a.list_id - b.list_id || a.position - b.position)
+        cards.value = [...cards.value].sort(
+          (a, b) => a.list_id - b.list_id || a.position - b.position
+        )
       }
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
@@ -102,8 +112,25 @@ export const useCardStore = defineStore('card', () => {
     }
   }
 
+  async function fetchCardLabelsByBoard(boardId: number) {
+    error.value = null
+    try {
+      const result = await apiClient.get<Record<number, Label[]>>(
+        `/boards/${boardId}/card-labels`
+      )
+      const map = new Map<number, Label[]>()
+      for (const [cardId, labels] of Object.entries(result)) {
+        map.set(Number(cardId), labels)
+      }
+      cardLabels.value = map
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : String(e)
+    }
+  }
+
   return {
     cards,
+    cardLabels,
     loading,
     error,
     fetchCards,
@@ -111,6 +138,8 @@ export const useCardStore = defineStore('card', () => {
     createCard,
     updateCard,
     deleteCard,
+    removeCardsByList,
     moveCard,
+    fetchCardLabelsByBoard,
   }
 })

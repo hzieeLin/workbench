@@ -52,6 +52,7 @@
         v-else-if="currentView === 'calendar'"
         :cards="filteredCards"
         @edit="openCardDetail"
+        @update="handleCardUpdate"
       />
       <TimelineView
         v-else-if="currentView === 'timeline'"
@@ -124,7 +125,7 @@ const currentView = ref('board')
 const currentBoard = computed(() => boardStore.currentBoard)
 const lists = computed(() => listStore.lists)
 const availableLabels = computed(() => labelStore.labels)
-const cardLabels = computed(() => new Map<number, any[]>())
+const cardLabels = computed(() => cardStore.cardLabels)
 
 const searchQuery = ref('')
 const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[] }>({
@@ -176,6 +177,16 @@ const filteredCards = computed(() => {
       }
 
       return false
+    })
+  }
+
+  if (activeFilters.value.labels.length > 0) {
+    result = result.filter((card) => {
+      const labels = cardLabels.value.get(card.id)
+      if (!labels || labels.length === 0) return false
+      return activeFilters.value.labels.some((labelId) =>
+        labels.some((l) => l.id === labelId)
+      )
     })
   }
 
@@ -258,6 +269,7 @@ watch(currentBoard, async (board) => {
     await listStore.fetchLists(board.id)
     await cardStore.fetchCardsByBoard(board.id)
     await labelStore.fetchLabels(board.id)
+    await cardStore.fetchCardLabelsByBoard(board.id)
   }
 })
 
@@ -267,6 +279,10 @@ function openCardDetail(card: Card) {
 
 function deleteCard(id: number) {
   cardStore.deleteCard(id)
+}
+
+async function handleCardUpdate(card: Card, newDate: string) {
+  await cardStore.updateCard(card.id, { due_date: new Date(newDate) })
 }
 </script>
 
