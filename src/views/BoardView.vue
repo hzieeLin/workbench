@@ -6,8 +6,34 @@
         <h2>{{ currentBoard?.name || '请选择一个看板' }}</h2>
       </div>
       <div class="board-actions">
-        <button :disabled="!currentBoard" @click="showCreateList = true">+ 新建列表</button>
+        <button :disabled="!currentBoard" @click="showCreateList = true">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M7 1v12M1 7h12"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>新建列表</span>
+        </button>
       </div>
+    </div>
+    <div class="board-toolbar" v-if="currentBoard">
+      <SearchBar 
+        :result-count="filteredCardsCount" 
+        @search="handleSearch" 
+      />
+      <FilterPanel 
+        :available-labels="availableLabels" 
+        @filter="handleFilter" 
+      />
+      <ActiveFilters 
+        v-if="hasActiveFilters"
+        :filters="activeFilters" 
+        :available-labels="availableLabels"
+        @update:filters="updateFilters"
+      />
     </div>
     <div class="board-columns" v-if="currentBoard">
       <BoardColumn
@@ -18,6 +44,25 @@
       />
     </div>
     <div v-else class="empty-state">
+      <div class="empty-icon">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <rect
+            x="8"
+            y="8"
+            width="48"
+            height="48"
+            rx="8"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-dasharray="4 3"
+            opacity="0.3"
+          />
+          <rect x="18" y="20" width="12" height="4" rx="2" fill="currentColor" opacity="0.12" />
+          <rect x="18" y="28" width="28" height="4" rx="2" fill="currentColor" opacity="0.12" />
+          <rect x="18" y="36" width="20" height="4" rx="2" fill="currentColor" opacity="0.08" />
+          <circle cx="32" cy="54" r="3" fill="var(--color-accent)" opacity="0.3" />
+        </svg>
+      </div>
       <h3>还没有打开的看板</h3>
       <p>请从左侧选择一个看板，或创建新的看板开始整理任务。</p>
     </div>
@@ -40,6 +85,9 @@ import { Card } from '@/database/entities/Card'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
 import CardDetailModal from '@/components/board/CardDetailModal.vue'
+import SearchBar from '@/components/board/SearchBar.vue'
+import FilterPanel from '@/components/board/FilterPanel.vue'
+import ActiveFilters from '@/components/board/ActiveFilters.vue'
 
 const boardStore = useBoardStore()
 const listStore = useListStore()
@@ -49,6 +97,41 @@ const selectedCard = ref<Card | null>(null)
 
 const currentBoard = computed(() => boardStore.currentBoard)
 const lists = computed(() => listStore.lists)
+
+const searchQuery = ref('')
+const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[] }>({
+  priorities: [],
+  due: [],
+  labels: []
+})
+
+const filteredCardsCount = computed(() => {
+  // This will be implemented when the card filtering logic is added
+  return null
+})
+
+const hasActiveFilters = computed(() => {
+  return activeFilters.value.priorities.length > 0 ||
+         activeFilters.value.due.length > 0 ||
+         activeFilters.value.labels.length > 0
+})
+
+const availableLabels = computed(() => {
+  // This will be implemented when the label store is integrated
+  return []
+})
+
+function handleSearch(query: string) {
+  searchQuery.value = query
+}
+
+function handleFilter(filters: { priorities: string[]; due: string[]; labels: number[] }) {
+  activeFilters.value = filters
+}
+
+function updateFilters(filters: { priorities: string[]; due: string[]; labels: number[] }) {
+  activeFilters.value = filters
+}
 
 watch(currentBoard, async (board) => {
   if (board) {
@@ -67,6 +150,18 @@ function openCardDetail(card: Card) {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  animation: boardFadeIn 0.4s ease;
+}
+
+@keyframes boardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .board-header {
@@ -74,70 +169,95 @@ function openCardDetail(card: Card) {
   justify-content: space-between;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .eyebrow {
   margin-bottom: 6px;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .board-header h2 {
-  font-size: 26px;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.15;
   color: var(--color-text);
 }
 
 .board-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-height: 38px;
-  padding: 0 16px;
-  border: 1px solid var(--color-primary);
-  border-radius: 8px;
-  background: var(--color-primary);
-  color: white;
-  cursor: pointer;
-  font-weight: 700;
-  box-shadow: 0 8px 18px rgba(36, 120, 106, 0.18);
+  padding: 0 18px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
 }
 
 .board-actions button:hover:not(:disabled) {
-  background: var(--color-primary-strong);
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+  box-shadow: var(--shadow-glow);
 }
 
 .board-actions button:disabled {
-  opacity: 0.45;
+  opacity: 0.3;
   cursor: not-allowed;
+}
+
+.board-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .board-columns {
   flex: 1;
   display: flex;
-  gap: 16px;
+  gap: 14px;
   overflow-x: auto;
   padding: 2px 2px 18px;
 }
 
 .empty-state {
   flex: 1;
-  display: grid;
-  place-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  color: var(--color-muted);
-  background: rgba(255, 253, 248, 0.62);
-  border: 1px dashed var(--color-border);
-  border-radius: 8px;
+  color: var(--color-text-tertiary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  gap: 12px;
+}
+
+.empty-icon {
+  color: var(--color-text-tertiary);
+  margin-bottom: 4px;
 }
 
 .empty-state h3 {
-  margin-bottom: 8px;
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   font-size: 18px;
+  font-weight: 500;
 }
 
 .empty-state p {
   max-width: 360px;
   line-height: 1.7;
+  font-size: 14px;
 }
 </style>
