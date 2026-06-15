@@ -6,6 +6,7 @@
         <h2>{{ currentBoard?.name || '请选择一个看板' }}</h2>
       </div>
       <div class="board-actions">
+        <ViewSwitcher :current-view="currentView" @change="currentView = $event" />
         <button :disabled="!currentBoard" @click="showCreateList = true">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path
@@ -35,12 +36,31 @@
         @update:filters="updateFilters"
       />
     </div>
-    <div class="board-columns" v-if="currentBoard">
+    <div class="board-content" v-if="currentBoard">
       <BoardColumn
+        v-if="currentView === 'board'"
         v-for="list in lists"
         :key="list.id"
         :list="list"
         @select-card="openCardDetail"
+      />
+      <ListView
+        v-else-if="currentView === 'list'"
+        :cards="allCards"
+        :lists="lists"
+        :card-labels="cardLabels"
+        @edit="openCardDetail"
+        @delete="deleteCard"
+      />
+      <CalendarView
+        v-else-if="currentView === 'calendar'"
+        :cards="allCards"
+        @edit="openCardDetail"
+      />
+      <TimelineView
+        v-else-if="currentView === 'timeline'"
+        :cards="allCards"
+        @edit="openCardDetail"
       />
     </div>
     <div v-else class="empty-state">
@@ -88,15 +108,30 @@ import CardDetailModal from '@/components/board/CardDetailModal.vue'
 import SearchBar from '@/components/board/SearchBar.vue'
 import FilterPanel from '@/components/board/FilterPanel.vue'
 import ActiveFilters from '@/components/board/ActiveFilters.vue'
+import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
+import ListView from '@/components/board/ListView.vue'
+import CalendarView from '@/components/board/CalendarView.vue'
+import TimelineView from '@/components/board/TimelineView.vue'
 
 const boardStore = useBoardStore()
 const listStore = useListStore()
 
 const showCreateList = ref(false)
 const selectedCard = ref<Card | null>(null)
+const currentView = ref('board')
 
 const currentBoard = computed(() => boardStore.currentBoard)
 const lists = computed(() => listStore.lists)
+const allCards = computed(() => {
+  const cards: Card[] = []
+  lists.value.forEach(list => {
+    if (list.cards) {
+      cards.push(...list.cards)
+    }
+  })
+  return cards
+})
+const cardLabels = computed(() => new Map<number, any[]>())
 
 const searchQuery = ref('')
 const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[] }>({
@@ -141,6 +176,11 @@ watch(currentBoard, async (board) => {
 
 function openCardDetail(card: Card) {
   selectedCard.value = card
+}
+
+function deleteCard(id: number) {
+  // TODO: implement card deletion
+  console.log('Delete card:', id)
 }
 </script>
 
@@ -222,12 +262,18 @@ function openCardDetail(card: Card) {
   flex-wrap: wrap;
 }
 
-.board-columns {
+.board-content {
   flex: 1;
   display: flex;
   gap: 14px;
   overflow-x: auto;
   padding: 2px 2px 18px;
+}
+
+.board-columns {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
 }
 
 .empty-state {
