@@ -17,6 +17,7 @@ module.exports = {
     '**/tests/unit/**/*.test.ts',
     '**/tests/components/**/*.test.ts',
     '**/tests/server/**/*.test.ts',
+    '**/tests/integration/**/*.test.ts',
   ],
   moduleFileExtensions: ['ts', 'js', 'vue', 'json'],
 }

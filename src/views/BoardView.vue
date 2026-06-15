@@ -21,37 +21,28 @@
       </div>
     </div>
     <div class="board-toolbar" v-if="currentBoard">
-      <SearchBar 
-        :result-count="filteredCardsCount" 
-        @search="handleSearch" 
-      />
-      <FilterPanel 
-        :available-labels="availableLabels" 
-        @filter="handleFilter" 
-      />
-      <SortSelector 
-        :current-sort="sortField" 
-        :direction="sortDirection" 
-        @sort="handleSort" 
-      />
-      <ActiveFilters 
-        v-if="hasActiveFilters"
-        :filters="activeFilters" 
-        :available-labels="availableLabels"
-        @update:filters="updateFilters"
-      />
+      <SearchBar :result-count="filteredCardsCount" @search="handleSearch" />
+      <FilterPanel :available-labels="availableLabels" @filter="handleFilter" />
+      <SortSelector :current-sort="sortField" :direction="sortDirection" @sort="handleSort" />
     </div>
+    <ActiveFilters
+      v-if="hasActiveFilters"
+      :filters="activeFilters"
+      :available-labels="availableLabels"
+      @update:filters="updateFilters"
+    />
     <div class="board-content" v-if="currentBoard">
       <BoardColumn
         v-if="currentView === 'board'"
-        v-for="list in lists"
+        v-for="list in filteredLists"
         :key="list.id"
         :list="list"
+        :filtered-cards="getFilteredListCards(list.id)"
         @select-card="openCardDetail"
       />
       <ListView
         v-else-if="currentView === 'list'"
-        :cards="sortedCards"
+        :cards="filteredCards"
         :lists="lists"
         :card-labels="cardLabels"
         @edit="openCardDetail"
@@ -59,13 +50,12 @@
       />
       <CalendarView
         v-else-if="currentView === 'calendar'"
-        :cards="sortedCards"
+        :cards="filteredCards"
         @edit="openCardDetail"
-        @update="handleCardUpdate"
       />
       <TimelineView
         v-else-if="currentView === 'timeline'"
-        :cards="sortedCards"
+        :cards="filteredCards"
         @edit="openCardDetail"
       />
     </div>
@@ -108,6 +98,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import { useListStore } from '@/stores/list'
 import { useCardStore } from '@/stores/card'
+import { useLabelStore } from '@/stores/label'
 import { Card } from '@/database/entities/Card'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
@@ -124,6 +115,7 @@ import TimelineView from '@/components/board/TimelineView.vue'
 const boardStore = useBoardStore()
 const listStore = useListStore()
 const cardStore = useCardStore()
+const labelStore = useLabelStore()
 
 const showCreateList = ref(false)
 const selectedCard = ref<Card | null>(null)
@@ -131,32 +123,66 @@ const currentView = ref('board')
 
 const currentBoard = computed(() => boardStore.currentBoard)
 const lists = computed(() => listStore.lists)
-const allCards = computed(() => {
-  const cards: Card[] = []
-  lists.value.forEach(list => {
-    if (list.cards) {
-      cards.push(...list.cards)
-    }
-  })
-  return cards
-})
+const availableLabels = computed(() => labelStore.labels)
 const cardLabels = computed(() => new Map<number, any[]>())
 
 const searchQuery = ref('')
 const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[] }>({
   priorities: [],
   due: [],
-  labels: []
+  labels: [],
 })
 const sortField = ref<'created_at' | 'updated_at' | 'priority' | 'due_date' | 'title'>('created_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 
-const sortedCards = computed(() => {
-  const cards = [...allCards.value]
+const filteredCards = computed(() => {
+  let result = [...cardStore.cards]
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(
+      (card) =>
+        card.title.toLowerCase().includes(query) ||
+        (card.description && card.description.toLowerCase().includes(query))
+    )
+  }
+
+  if (activeFilters.value.priorities.length > 0) {
+    result = result.filter((card) => activeFilters.value.priorities.includes(card.priority))
+  }
+
+  if (activeFilters.value.due.length > 0) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const weekEnd = new Date(today)
+    weekEnd.setDate(weekEnd.getDate() + 7)
+
+    result = result.filter((card) => {
+      if (activeFilters.value.due.includes('none') && !card.due_date) return true
+      if (!card.due_date) return false
+
+      const dueDate = new Date(card.due_date)
+
+      if (activeFilters.value.due.includes('today')) {
+        if (dueDate.toDateString() === today.toDateString()) return true
+      }
+
+      if (activeFilters.value.due.includes('week')) {
+        if (dueDate >= today && dueDate <= weekEnd) return true
+      }
+
+      if (activeFilters.value.due.includes('overdue')) {
+        if (dueDate < today) return true
+      }
+
+      return false
+    })
+  }
+
   const field = sortField.value
   const dir = sortDirection.value === 'asc' ? 1 : -1
 
-  cards.sort((a, b) => {
+  result.sort((a, b) => {
     const aVal = a[field]
     const bVal = b[field]
 
@@ -176,30 +202,36 @@ const sortedCards = computed(() => {
     return String(aVal).localeCompare(String(bVal)) * dir
   })
 
-  return cards
+  return result
 })
+
+const filteredCardsCount = computed(() => filteredCards.value.length)
+
+const hasActiveFilters = computed(() => {
+  return (
+    activeFilters.value.priorities.length > 0 ||
+    activeFilters.value.due.length > 0 ||
+    activeFilters.value.labels.length > 0
+  )
+})
+
+const filteredLists = computed(() => {
+  if (!hasActiveFilters.value && !searchQuery.value) return lists.value
+  return lists.value.filter((list) => {
+    const listCards = filteredCards.value.filter((card) => card.list_id === list.id)
+    return listCards.length > 0
+  })
+})
+
+function getFilteredListCards(listId: number) {
+  return filteredCards.value.filter((card) => card.list_id === listId)
+}
 
 onMounted(() => {
   const savedSortField = localStorage.getItem('sortField')
   const savedSortDirection = localStorage.getItem('sortDirection')
   if (savedSortField) sortField.value = savedSortField as typeof sortField.value
   if (savedSortDirection) sortDirection.value = savedSortDirection as typeof sortDirection.value
-})
-
-const filteredCardsCount = computed(() => {
-  // This will be implemented when the card filtering logic is added
-  return null
-})
-
-const hasActiveFilters = computed(() => {
-  return activeFilters.value.priorities.length > 0 ||
-         activeFilters.value.due.length > 0 ||
-         activeFilters.value.labels.length > 0
-})
-
-const availableLabels = computed(() => {
-  // This will be implemented when the label store is integrated
-  return []
 })
 
 function handleSearch(query: string) {
@@ -224,6 +256,8 @@ function handleSort(field: string, direction: string) {
 watch(currentBoard, async (board) => {
   if (board) {
     await listStore.fetchLists(board.id)
+    await cardStore.fetchCardsByBoard(board.id)
+    await labelStore.fetchLabels(board.id)
   }
 })
 
@@ -232,12 +266,7 @@ function openCardDetail(card: Card) {
 }
 
 function deleteCard(id: number) {
-  // TODO: implement card deletion
-  console.log('Delete card:', id)
-}
-
-async function handleCardUpdate(card: Card, newDate: string) {
-  await cardStore.updateCard(card.id, { due_date: new Date(newDate) })
+  cardStore.deleteCard(id)
 }
 </script>
 
