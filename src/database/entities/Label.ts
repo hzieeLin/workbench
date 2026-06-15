@@ -6,6 +6,9 @@ export class Label {
   id!: number
 
   @Column()
+  board_id!: number
+
+  @Column()
   name!: string
 
   @Column()

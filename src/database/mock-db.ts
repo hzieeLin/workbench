@@ -214,6 +214,7 @@ export const mockDB = {
     create(data: Partial<Label>): Label {
       const label: Label = {
         id: generateId(),
+        board_id: data.board_id || 0,
         name: data.name || '',
         color: data.color || '#999',
         cardLabels: [],

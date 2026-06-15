@@ -11,6 +11,7 @@ import { ActivityLog } from './entities/ActivityLog'
 import { Comment } from './entities/Comment'
 import { InitialSchema1710000000000 } from './migrations/InitialSchema'
 import { AddCommentsTable1710000000001 } from './migrations/AddCommentsTable'
+import { AddLabelBoardId1710000000002 } from './migrations/AddLabelBoardId'
 
 const isBrowser = typeof window !== 'undefined'
 
@@ -70,7 +71,7 @@ export function getDataSource(): DataSource {
     synchronize: false,
     logging: false,
     entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment],
-    migrations: [InitialSchema1710000000000, AddCommentsTable1710000000001],
+    migrations: [InitialSchema1710000000000, AddCommentsTable1710000000001, AddLabelBoardId1710000000002],
     subscribers: [],
   })
 

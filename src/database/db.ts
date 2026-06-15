@@ -178,6 +178,7 @@ export const db = {
     create(d: Partial<Label>): Label {
       const l: Label = {
         id: genId(),
+        board_id: d.board_id || 0,
         name: d.name || '',
         color: d.color || '#999',
         cardLabels: [],

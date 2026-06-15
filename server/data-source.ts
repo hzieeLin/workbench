@@ -10,6 +10,8 @@ import { Label } from '../src/database/entities/Label'
 import { List } from '../src/database/entities/List'
 import { TimeBlock } from '../src/database/entities/TimeBlock'
 import { InitialSchema1710000000000 } from '../src/database/migrations/InitialSchema'
+import { AddCommentsTable1710000000001 } from '../src/database/migrations/AddCommentsTable'
+import { AddLabelBoardId1710000000002 } from '../src/database/migrations/AddLabelBoardId'
 import { config } from './config'
 
 export function createDataSource() {
@@ -23,6 +25,6 @@ export function createDataSource() {
     synchronize: false,
     logging: false,
     entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment],
-    migrations: [InitialSchema1710000000000],
+    migrations: [InitialSchema1710000000000, AddCommentsTable1710000000001, AddLabelBoardId1710000000002],
   })
 }

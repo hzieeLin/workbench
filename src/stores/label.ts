@@ -1,19 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { AppDataSource } from '@/database/connection'
-import { Label } from '@/database/entities/Label'
+import type { Label } from '@/database/entities/Label'
+import { apiClient } from '@/services/api'
 
 export const useLabelStore = defineStore('label', () => {
   const labels = ref<Label[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchLabels() {
+  async function fetchLabels(boardId: number) {
     loading.value = true
     error.value = null
     try {
-      const labelRepo = AppDataSource.getRepository(Label)
-      labels.value = await labelRepo.find()
+      labels.value = await apiClient.get<Label[]>(`/boards/${boardId}/labels`)
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
     } finally {
@@ -21,14 +20,12 @@ export const useLabelStore = defineStore('label', () => {
     }
   }
 
-  async function createLabel(name: string, color: string) {
+  async function createLabel(boardId: number, name: string, color: string) {
     error.value = null
     try {
-      const labelRepo = AppDataSource.getRepository(Label)
-      const label = labelRepo.create({ name, color })
-      const saved = await labelRepo.save(label)
-      labels.value.push(saved)
-      return saved
+      const label = await apiClient.post<Label>(`/boards/${boardId}/labels`, { name, color })
+      labels.value.push(label)
+      return label
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
       throw e
@@ -38,8 +35,7 @@ export const useLabelStore = defineStore('label', () => {
   async function updateLabel(id: number, data: Partial<Label>) {
     error.value = null
     try {
-      const labelRepo = AppDataSource.getRepository(Label)
-      await labelRepo.update(id, data)
+      await apiClient.patch(`/labels/${id}`, data as Record<string, unknown>)
       const index = labels.value.findIndex((l) => l.id === id)
       if (index !== -1) {
         labels.value[index] = { ...labels.value[index], ...data }
@@ -53,8 +49,7 @@ export const useLabelStore = defineStore('label', () => {
   async function deleteLabel(id: number) {
     error.value = null
     try {
-      const labelRepo = AppDataSource.getRepository(Label)
-      await labelRepo.delete(id)
+      await apiClient.delete(`/labels/${id}`)
       labels.value = labels.value.filter((l) => l.id !== id)
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
@@ -62,13 +57,5 @@ export const useLabelStore = defineStore('label', () => {
     }
   }
 
-  return {
-    labels,
-    loading,
-    error,
-    fetchLabels,
-    createLabel,
-    updateLabel,
-    deleteLabel,
-  }
+  return { labels, loading, error, fetchLabels, createLabel, updateLabel, deleteLabel }
 })
