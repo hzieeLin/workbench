@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
+import { useThemeStore } from '@/stores/theme'
 
 Chart.register(...registerables)
 
@@ -22,11 +23,14 @@ const props = defineProps<{
   }
 }>()
 
+const themeStore = useThemeStore()
+
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
 
 onMounted(() => {
   if (chartCanvas.value) {
+    const isDark = themeStore.isDark
     const colors = ['#FF6B4A', '#4AD9D9', '#FFC043']
     const datasets = props.data.datasets.map((d, i) => ({
       ...d,
@@ -47,20 +51,20 @@ onMounted(() => {
         plugins: {
           legend: {
             labels: {
-              color: '#A09E98',
+              color: isDark ? '#a0a0b0' : '#5a5a72',
               font: { family: "'DM Sans', sans-serif", size: 11 },
             },
           },
         },
         scales: {
           x: {
-            ticks: { color: '#6B6A66', font: { size: 11 } },
-            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: isDark ? '#6a6a7e' : '#8a8a9e', font: { size: 11 } },
+            grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
           },
           y: {
             beginAtZero: true,
-            ticks: { color: '#6B6A66', font: { size: 11 } },
-            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: isDark ? '#6a6a7e' : '#8a8a9e', font: { size: 11 } },
+            grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
           },
         },
       },
