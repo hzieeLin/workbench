@@ -19,14 +19,7 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
 const themeStore = useThemeStore()
 
-const themeConfig = computed(() => ({
-  algorithm: themeStore.getAlgorithm(),
-  token: {
-    colorPrimary: '#FF6B4A',
-    borderRadius: 10,
-    fontFamily: "'DM Sans', 'Noto Sans CJK SC', 'PingFang SC', sans-serif",
-  },
-}))
+const themeConfig = computed(() => themeStore.getThemeConfig())
 
 useKeyboardShortcuts()
 </script>
@@ -49,6 +42,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 ::selection {

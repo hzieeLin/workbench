@@ -8,6 +8,12 @@
     />
     <div class="actions">
       <a-space>
+        <a-button type="text" shape="circle" @click="themeStore.toggleTheme()" :title="themeStore.isDark ? '切换到浅色主题' : '切换到深色主题'">
+          <template #icon>
+            <SunOutlined v-if="themeStore.isDark" />
+            <MoonOutlined v-else />
+          </template>
+        </a-button>
         <a-button type="text" shape="circle">
           <template #icon><BellOutlined /></template>
         </a-button>
@@ -22,8 +28,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { BellOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import { BellOutlined, SettingOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons-vue'
+import { useThemeStore } from '@/stores/theme'
 
+const themeStore = useThemeStore()
 const searchQuery = ref('')
 </script>
 
