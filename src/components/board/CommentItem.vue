@@ -1,19 +1,25 @@
 <template>
-  <div class="comment-item">
-    <div class="comment-header">
-      <div class="comment-author">
-        <div class="author-avatar">{{ comment.author.charAt(0) }}</div>
-        <span class="author-name">{{ comment.author }}</span>
-      </div>
-      <div class="comment-meta">
-        <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
-        <button v-if="comment.author === '用户'" @click="handleDelete" class="delete-btn">
-          删除
-        </button>
-      </div>
-    </div>
-    <div class="comment-content">{{ comment.content }}</div>
-  </div>
+  <a-comment>
+    <template #author>
+      <span>{{ comment.author }}</span>
+    </template>
+    <template #avatar>
+      <a-avatar size="small" style="background-color: var(--ant-color-primary)">
+        {{ comment.author.charAt(0) }}
+      </a-avatar>
+    </template>
+    <template #datetime>
+      <span>{{ formatTime(comment.created_at) }}</span>
+    </template>
+    <template #content>
+      <p>{{ comment.content }}</p>
+    </template>
+    <template #actions>
+      <span v-if="comment.author === '用户'" key="delete" @click="handleDelete">
+        删除
+      </span>
+    </template>
+  </a-comment>
 </template>
 
 <script setup lang="ts">
@@ -43,82 +49,6 @@ function formatTime(date: Date) {
 }
 
 function handleDelete() {
-  if (confirm('确定要删除这条评论吗？')) {
-    emit('delete', props.comment.id)
-  }
+  emit('delete', props.comment.id)
 }
 </script>
-
-<style scoped>
-.comment-item {
-  padding: 12px;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.comment-author {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.author-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.author-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.comment-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.comment-time {
-  font-size: 12px;
-  color: var(--color-text-tertiary);
-}
-
-.delete-btn {
-  padding: 2px 6px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-tertiary);
-  font-size: 12px;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-}
-
-.delete-btn:hover {
-  background: var(--color-red-soft);
-  color: var(--color-red);
-}
-
-.comment-content {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--color-text);
-  white-space: pre-wrap;
-}
-</style>
