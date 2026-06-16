@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { List } from '@/database/entities/List'
 import { Card } from '@/database/entities/Card'
 import { useCardStore } from '@/stores/card'

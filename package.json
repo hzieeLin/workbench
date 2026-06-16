@@ -47,9 +47,10 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
-    "antd": "^6.4.4",
+    "ant-design-vue": "^4.2.6",
     "chart.js": "^4.5.1",
     "cors": "^2.8.6",
+    "dayjs": "^1.11.21",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mysql2": "^3.22.5",

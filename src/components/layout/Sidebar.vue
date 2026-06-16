@@ -141,7 +141,7 @@ function selectBoard(board: Board) {
   boardStore.setCurrentBoard(board)
 }
 
-function openContextMenu(e: MouseEvent, board: Board) {
+function openContextMenu(_e: MouseEvent, board: Board) {
   contextMenuBoard.value = board
   contextMenuVisible.value = true
 }

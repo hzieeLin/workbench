@@ -19,7 +19,7 @@
       <a-segmented
         :value="viewMode"
         :options="viewOptions"
-        @change="(val: string) => $emit('change-view', val)"
+        @change="(val: string) => $emit('change-view', val as 'month' | 'week' | 'day')"
       />
     </div>
   </div>

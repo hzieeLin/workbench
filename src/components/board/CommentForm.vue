@@ -4,8 +4,7 @@
       v-model:value="content"
       placeholder="添加评论..."
       :auto-size="{ minRows: 3, maxRows: 6 }"
-      @keydown.enter.meta="handleSubmit"
-      @keydown.enter.ctrl="handleSubmit"
+      @keydown.enter.exact="handleSubmit"
     />
     <div class="form-actions">
       <span class="hint">⌘ + Enter 发送</span>
