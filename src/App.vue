@@ -49,7 +49,7 @@ body {
 
 :root {
   --color-accent: #FF6B4A;
-  --color-accent-soft: rgba(255, 107, 74, 0.12);
+  --color-accent-soft: rgba(255, 107, 74, 0.1);
   --color-accent-strong: #e85a3a;
 
   --color-text: #1a1a2e;
@@ -57,17 +57,17 @@ body {
   --color-text-tertiary: #8a8a9e;
   --color-text-inverse: #ffffff;
 
-  --color-bg: #f5f5f7;
+  --color-bg: #f0f1f3;
   --color-surface: #ffffff;
   --color-surface-elevated: #ffffff;
-  --color-surface-glass: rgba(255, 255, 255, 0.72);
+  --color-surface-glass: rgba(255, 255, 255, 0.82);
   --color-surface-hover: rgba(0, 0, 0, 0.04);
 
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-hover: rgba(0, 0, 0, 0.15);
+  --color-border: #e0e0e4;
+  --color-border-hover: #c8c8ce;
 
   --color-red: #ef4444;
-  --color-red-soft: rgba(239, 68, 68, 0.1);
+  --color-red-soft: rgba(239, 68, 68, 0.08);
 
   --font-display: 'Fraunces', 'Noto Sans CJK SC', serif;
 
@@ -75,7 +75,9 @@ body {
   --radius-md: 10px;
   --radius-lg: 14px;
 
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-glow: 0 0 20px rgba(255, 107, 74, 0.25);
 
   --blur-sm: blur(12px);
@@ -130,5 +132,47 @@ body {
 .page-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+.ant-modal-content {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid var(--color-border) !important;
+}
+
+.ant-dropdown-menu {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.ant-popover-inner {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.ant-select-dropdown {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.ant-picker-dropdown {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.ant-picker-panel-container {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--color-border) !important;
 }
 </style>

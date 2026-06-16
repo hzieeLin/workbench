@@ -20,12 +20,12 @@ export const useThemeStore = defineStore('theme', () => {
         colorPrimary: '#FF6B4A',
         borderRadius: 10,
         fontFamily: "'DM Sans', 'Noto Sans CJK SC', 'PingFang SC', sans-serif",
-        colorBgContainer: isDark.value ? '#1a1a2e' : undefined,
-        colorBgLayout: isDark.value ? '#0f0f23' : undefined,
-        colorBgElevated: isDark.value ? '#252540' : undefined,
-        colorBorder: isDark.value ? 'rgba(255, 255, 255, 0.12)' : undefined,
-        colorText: isDark.value ? '#e8e8e8' : undefined,
-        colorTextSecondary: isDark.value ? '#a0a0b0' : undefined,
+        colorBgContainer: isDark.value ? '#1a1a2e' : '#ffffff',
+        colorBgLayout: isDark.value ? '#0f0f23' : '#f0f1f3',
+        colorBgElevated: isDark.value ? '#252540' : '#ffffff',
+        colorBorder: isDark.value ? 'rgba(255, 255, 255, 0.12)' : '#e0e0e4',
+        colorText: isDark.value ? '#e8e8e8' : '#1a1a2e',
+        colorTextSecondary: isDark.value ? '#a0a0b0' : '#5a5a72',
       },
     }
   }
