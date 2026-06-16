@@ -1,145 +1,127 @@
 <template>
-  <aside class="sidebar">
+  <a-layout-sider class="sidebar" :width="256">
     <div class="logo">
       <span class="logo-mark">✦</span>
       <h1>TaskFlow</h1>
     </div>
 
-    <nav class="nav-menu">
-      <router-link to="/" class="nav-item" exact-active-class="active">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <rect
-              x="1"
-              y="1"
-              width="6"
-              height="6"
-              rx="1.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <rect
-              x="9"
-              y="1"
-              width="6"
-              height="6"
-              rx="1.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <rect
-              x="1"
-              y="9"
-              width="6"
-              height="6"
-              rx="1.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <rect
-              x="9"
-              y="9"
-              width="6"
-              height="6"
-              rx="1.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-          </svg>
-        </span>
-        <span>看板</span>
-      </router-link>
-      <router-link to="/calendar" class="nav-item" active-class="active">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <rect
-              x="1.5"
-              y="3"
-              width="13"
-              height="11.5"
-              rx="2"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <path d="M1.5 6.5h13" stroke="currentColor" stroke-width="1.5" />
-            <path
-              d="M5 1v3M11 1v3"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-          </svg>
-        </span>
-        <span>时间规划</span>
-      </router-link>
-      <router-link to="/statistics" class="nav-item" active-class="active">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M1 14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            <rect x="3" y="8" width="2.5" height="6" rx="1" fill="currentColor" opacity="0.4" />
-            <rect x="6.75" y="5" width="2.5" height="9" rx="1" fill="currentColor" opacity="0.6" />
-            <rect x="10.5" y="2" width="2.5" height="12" rx="1" fill="currentColor" />
-          </svg>
-        </span>
-        <span>统计分析</span>
-      </router-link>
-    </nav>
+    <a-menu mode="inline" :selected-keys="selectedKeys" class="nav-menu">
+      <a-menu-item key="/" @click="$router.push('/')">
+        <template #icon><AppstoreOutlined /></template>
+        看板
+      </a-menu-item>
+      <a-menu-item key="/calendar" @click="$router.push('/calendar')">
+        <template #icon><CalendarOutlined /></template>
+        时间规划
+      </a-menu-item>
+      <a-menu-item key="/statistics" @click="$router.push('/statistics')">
+        <template #icon><BarChartOutlined /></template>
+        统计分析
+      </a-menu-item>
+    </a-menu>
 
     <div class="board-section">
       <div class="board-section-header">
-        <h3>我的看板</h3>
-        <span class="board-count">{{ boards.length }}</span>
+        <span>我的看板</span>
+        <a-badge :count="boards.length" />
       </div>
-      <ul class="board-list">
-        <li
-          v-for="board in boards"
-          :key="board.id"
-          class="board-item"
-          :class="{ active: boardStore.currentBoard?.id === board.id }"
-          @click="selectBoard(board)"
-        >
-          <span class="board-dot" :style="{ background: boardColor(board.id) }" />
-          <span class="board-name">{{ board.name }}</span>
-        </li>
-      </ul>
+      <a-list :data-source="boards" size="small" class="board-list" :bordered="false">
+        <template #renderItem="{ item: board }">
+          <a-list-item
+            class="board-item"
+            :class="{ active: boardStore.currentBoard?.id === board.id }"
+            @click="selectBoard(board)"
+            @contextmenu.prevent="openContextMenu($event, board)"
+          >
+            <span class="board-dot" :style="{ background: boardColor(board.id) }" />
+            <a-input
+              v-if="editingBoardId === board.id"
+              v-model:value="editingName"
+              size="small"
+              @blur="saveBoardName(board)"
+              @pressEnter="saveBoardName(board)"
+              @keydown.escape="cancelEdit"
+              @click.stop
+            />
+            <span v-else class="board-name" @dblclick.stop="startEdit(board)">{{ board.name }}</span>
+          </a-list-item>
+        </template>
+      </a-list>
 
-      <!-- Label management for current board -->
-      <div v-if="boardStore.currentBoard" class="label-section">
-        <LabelManager :board-id="boardStore.currentBoard.id" />
-      </div>
-
-      <form v-if="showCreateBoard" class="create-board-form" @submit.prevent="handleCreateBoard">
-        <input v-model="newBoardName" placeholder="看板名称" required />
-        <div class="create-board-actions">
-          <button type="button" class="btn-secondary" @click="cancelCreateBoard">取消</button>
-          <button type="submit" class="btn-primary">创建</button>
-        </div>
-      </form>
-      <button v-else class="new-board-btn" @click="showCreateBoard = true">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path
-            d="M7 1v12M1 7h12"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span>新建看板</span>
-      </button>
+      <a-form v-if="showCreateBoard" @finish="handleCreateBoard" layout="vertical" size="small">
+        <a-form-item>
+          <a-input v-model:value="newBoardName" placeholder="看板名称" />
+        </a-form-item>
+        <a-space>
+          <a-button @click="cancelCreateBoard">取消</a-button>
+          <a-button type="primary" html-type="submit">创建</a-button>
+        </a-space>
+      </a-form>
+      <a-button v-else block dashed @click="showCreateBoard = true">
+        <template #icon><PlusOutlined /></template>
+        新建看板
+      </a-button>
     </div>
-  </aside>
+
+    <a-dropdown :trigger="['contextmenu']" v-model:open="contextMenuVisible">
+      <div />
+      <template #overlay>
+        <a-menu>
+          <a-menu-item key="delete" danger @click="handleDeleteBoard">
+            删除看板
+          </a-menu-item>
+        </a-menu>
+      </template>
+    </a-dropdown>
+  </a-layout-sider>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
 import { Board } from '@/database/entities/Board'
-import LabelManager from '@/components/board/LabelManager.vue'
+import {
+  AppstoreOutlined,
+  CalendarOutlined,
+  BarChartOutlined,
+  PlusOutlined,
+} from '@ant-design/icons-vue'
 
+const route = useRoute()
 const boardStore = useBoardStore()
 const boards = ref<Board[]>([])
 const showCreateBoard = ref(false)
 const newBoardName = ref('')
+
+const editingBoardId = ref<number | null>(null)
+const editingName = ref('')
+
+const selectedKeys = computed(() => {
+  if (route.path === '/calendar') return ['/calendar']
+  if (route.path === '/statistics') return ['/statistics']
+  return ['/']
+})
+
+function startEdit(board: Board) {
+  editingBoardId.value = board.id
+  editingName.value = board.name
+}
+
+async function saveBoardName(board: Board) {
+  const name = editingName.value.trim()
+  editingBoardId.value = null
+  if (!name || name === board.name) return
+  await boardStore.updateBoard(board.id, { name })
+  boards.value = boardStore.boards
+}
+
+function cancelEdit() {
+  editingBoardId.value = null
+}
+
+const contextMenuVisible = ref(false)
+const contextMenuBoard = ref<Board | null>(null)
 
 const boardColors = ['#FF6B4A', '#4AD9D9', '#FFC043', '#4CDF8B', '#A78BFA', '#FF5E5E']
 
@@ -150,10 +132,35 @@ function boardColor(id: number) {
 onMounted(async () => {
   await boardStore.fetchBoards()
   boards.value = boardStore.boards
+  if (!boardStore.currentBoard && boards.value.length > 0) {
+    boardStore.setCurrentBoard(boards.value[0])
+  }
 })
 
 function selectBoard(board: Board) {
   boardStore.setCurrentBoard(board)
+}
+
+function openContextMenu(e: MouseEvent, board: Board) {
+  contextMenuBoard.value = board
+  contextMenuVisible.value = true
+}
+
+async function handleDeleteBoard() {
+  const board = contextMenuBoard.value
+  if (!board) return
+
+  const idx = boards.value.findIndex((b) => b.id === board.id)
+  const nextBoard = boards.value[idx + 1] || boards.value[idx - 1] || null
+
+  await boardStore.deleteBoard(board.id)
+  boards.value = boardStore.boards
+
+  if (boardStore.currentBoard === null && nextBoard) {
+    boardStore.setCurrentBoard(nextBoard)
+  }
+
+  contextMenuVisible.value = false
 }
 
 function cancelCreateBoard() {
@@ -174,20 +181,13 @@ async function handleCreateBoard() {
 
 <style scoped>
 .sidebar {
-  width: 256px;
-  background: var(--color-surface-glass);
-  backdrop-filter: var(--blur-lg);
-  -webkit-backdrop-filter: var(--blur-lg);
-  border-right: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 2;
+  background: var(--ant-color-bg-container, #fff);
+  border-right: 1px solid var(--ant-color-border, #f0f0f0);
 }
 
 .logo {
   padding: 22px 22px 18px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ant-color-border, #f0f0f0);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -195,8 +195,7 @@ async function handleCreateBoard() {
 
 .logo-mark {
   font-size: 22px;
-  color: var(--color-accent);
-  line-height: 1;
+  color: var(--ant-color-primary, #FF6B4A);
 }
 
 .logo h1 {
@@ -204,55 +203,15 @@ async function handleCreateBoard() {
   font-size: 22px;
   font-weight: 600;
   font-style: italic;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
 }
 
 .nav-menu {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  padding: 8px 12px;
-  color: var(--color-text-tertiary);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.nav-item:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text-secondary);
-}
-
-.nav-item.active {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-}
-
-.nav-icon {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  flex-shrink: 0;
+  border-right: none !important;
 }
 
 .board-section {
-  flex: 1;
   padding: 8px 16px 16px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
 }
 
 .board-section-header {
@@ -261,53 +220,28 @@ async function handleCreateBoard() {
   justify-content: space-between;
   padding: 8px 8px 6px;
   margin-bottom: 2px;
-}
-
-.board-section-header h3 {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-text-tertiary);
-}
-
-.board-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  background: var(--color-surface);
-  padding: 1px 7px;
-  border-radius: 999px;
+  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
 }
 
 .board-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+  background: transparent;
 }
 
 .board-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
   cursor: pointer;
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  font-weight: 450;
   transition: all 0.2s ease;
 }
 
 .board-item:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: var(--ant-color-bg-text-hover, rgba(0,0,0,0.04));
 }
 
 .board-item.active {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: var(--ant-color-bg-text-hover, rgba(0,0,0,0.04));
 }
 
 .board-dot {
@@ -321,91 +255,5 @@ async function handleCreateBoard() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.new-board-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin-top: 10px;
-  padding: 9px 12px;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--color-text-tertiary);
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.new-board-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-}
-
-.create-board-form {
-  margin-top: 10px;
-}
-
-.create-board-form input {
-  width: 100%;
-  height: 36px;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-elevated);
-  outline: none;
-  color: var(--color-text);
-  font-size: 13px;
-  transition: border-color 0.2s ease;
-}
-
-.create-board-form input:focus {
-  border-color: var(--color-accent);
-  box-shadow: var(--focus-ring);
-}
-
-.create-board-form input::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.create-board-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.create-board-actions button {
-  min-height: 32px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 4px 10px;
-  transition: all 0.2s ease;
-}
-
-.btn-secondary {
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text-tertiary);
-}
-
-.btn-secondary:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text-secondary);
-}
-
-.btn-primary {
-  border: 1px solid var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-text-inverse);
-}
-
-.btn-primary:hover {
-  background: var(--color-accent-strong);
-  border-color: var(--color-accent-strong);
 }
 </style>
