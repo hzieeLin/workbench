@@ -80,14 +80,8 @@
     </Teleport>
     <div class="board-toolbar" v-if="currentBoard">
       <SearchBar :result-count="filteredCardsCount" @search="handleSearch" />
-      <FilterPanel @filter="handleFilter" />
       <SortSelector :current-sort="sortField" :direction="sortDirection" @sort="handleSort" />
     </div>
-    <ActiveFilters
-      v-if="hasActiveFilters"
-      :filters="activeFilters"
-      @update:filters="updateFilters"
-    />
     <div class="board-content" v-if="currentBoard">
       <BoardColumn
         v-if="currentView === 'board'"
@@ -156,8 +150,6 @@ import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
 import CardDetailModal from '@/components/board/CardDetailModal.vue'
 import SearchBar from '@/components/board/SearchBar.vue'
-import FilterPanel from '@/components/board/FilterPanel.vue'
-import ActiveFilters from '@/components/board/ActiveFilters.vue'
 import SortSelector from '@/components/board/SortSelector.vue'
 import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
 import ListView from '@/components/board/ListView.vue'
@@ -197,10 +189,6 @@ const boards = computed(() => boardStore.boards)
 const lists = computed(() => listStore.lists)
 
 const searchQuery = ref('')
-const activeFilters = ref<{ priorities: string[]; due: string[] }>({
-  priorities: [],
-  due: [],
-})
 const sortField = ref<'created_at' | 'updated_at' | 'priority' | 'due_date' | 'title'>('created_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 
@@ -214,38 +202,6 @@ const filteredCards = computed(() => {
         card.title.toLowerCase().includes(query) ||
         (card.description && card.description.toLowerCase().includes(query))
     )
-  }
-
-  if (activeFilters.value.priorities.length > 0) {
-    result = result.filter((card) => activeFilters.value.priorities.includes(card.priority))
-  }
-
-  if (activeFilters.value.due.length > 0) {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const weekEnd = new Date(today)
-    weekEnd.setDate(weekEnd.getDate() + 7)
-
-    result = result.filter((card) => {
-      if (activeFilters.value.due.includes('none') && !card.due_date) return true
-      if (!card.due_date) return false
-
-      const dueDate = new Date(card.due_date)
-
-      if (activeFilters.value.due.includes('today')) {
-        if (dueDate.toDateString() === today.toDateString()) return true
-      }
-
-      if (activeFilters.value.due.includes('week')) {
-        if (dueDate >= today && dueDate <= weekEnd) return true
-      }
-
-      if (activeFilters.value.due.includes('overdue')) {
-        if (dueDate < today) return true
-      }
-
-      return false
-    })
   }
 
   const field = sortField.value
@@ -276,12 +232,8 @@ const filteredCards = computed(() => {
 
 const filteredCardsCount = computed(() => filteredCards.value.length)
 
-const hasActiveFilters = computed(() => {
-  return activeFilters.value.priorities.length > 0 || activeFilters.value.due.length > 0
-})
-
 const filteredLists = computed(() => {
-  if (!hasActiveFilters.value && !searchQuery.value) return lists.value
+  if (!searchQuery.value) return lists.value
   return lists.value.filter((list) => {
     const listCards = filteredCards.value.filter((card) => card.list_id === list.id)
     return listCards.length > 0
@@ -352,14 +304,6 @@ async function handleDeleteBoard() {
 
 function handleSearch(query: string) {
   searchQuery.value = query
-}
-
-function handleFilter(filters: { priorities: string[]; due: string[] }) {
-  activeFilters.value = filters
-}
-
-function updateFilters(filters: { priorities: string[]; due: string[] }) {
-  activeFilters.value = filters
 }
 
 function handleSort(field: string, direction: string) {
