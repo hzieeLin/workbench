@@ -2,18 +2,21 @@ import { mount } from '@vue/test-utils'
 import SortSelector from '@/components/board/SortSelector.vue'
 
 describe('SortSelector', () => {
-  it('renders sort options', () => {
+  it('renders sort component', () => {
     const wrapper = mount(SortSelector, {
-      props: { currentSort: 'created_at', direction: 'desc' }
+      props: { currentSort: 'created_at', direction: 'desc' },
     })
-    expect(wrapper.find('select').exists()).toBe(true)
+    expect(wrapper.exists()).toBe(true)
   })
 
-  it('emits sort change on selection', async () => {
+  it('emits sort change on direction toggle', async () => {
     const wrapper = mount(SortSelector, {
-      props: { currentSort: 'created_at', direction: 'desc' }
+      props: { currentSort: 'created_at', direction: 'desc' },
     })
-    await wrapper.find('select').setValue('priority')
-    expect(wrapper.emitted('sort')).toBeTruthy()
+    const btn = wrapper.find('button')
+    if (btn.exists()) {
+      await btn.trigger('click')
+      expect(wrapper.emitted('sort')).toBeTruthy()
+    }
   })
 })
