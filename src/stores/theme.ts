@@ -13,7 +13,7 @@ export const useThemeStore = defineStore('theme', () => {
     return isDark.value ? theme.darkAlgorithm : theme.defaultAlgorithm
   }
 
-function getThemeConfig() {
+  function getThemeConfig() {
     return {
       algorithm: getAlgorithm(),
       token: {
@@ -32,7 +32,8 @@ function getThemeConfig() {
 
   watch(isDark, (val) => {
     localStorage.setItem('theme', val ? 'dark' : 'light')
-  })
+    document.documentElement.classList.toggle('dark', val)
+  }, { immediate: true })
 
   return { isDark, toggleTheme, getAlgorithm, getThemeConfig }
 })
