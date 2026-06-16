@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
+import { useThemeStore } from '@/stores/theme'
 
 Chart.register(...registerables)
 
@@ -34,6 +35,8 @@ const props = defineProps<{
   }
 }>()
 
+const themeStore = useThemeStore()
+
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
 
@@ -43,12 +46,12 @@ const percentage = computed(() => {
 })
 
 function getChartColors() {
-  const isDark = true
+  const dark = themeStore.isDark
   return {
     completed: '#4CDF8B',
     pending: '#FFC043',
-    border: isDark ? '#222326' : '#fffdf8',
-    text: isDark ? '#A09E98' : '#718087',
+    border: dark ? '#1a1a2e' : '#ffffff',
+    text: dark ? '#a0a0b0' : '#5a5a72',
   }
 }
 
