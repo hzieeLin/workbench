@@ -1,7 +1,6 @@
 <template>
   <a-space>
     <a-select v-model:value="selectedSort" @change="handleSort" style="width: 140px">
-      <a-select-option value="created_at">创建时间</a-select-option>
       <a-select-option value="updated_at">更新时间</a-select-option>
       <a-select-option value="priority">优先级</a-select-option>
       <a-select-option value="due_date">截止日期</a-select-option>

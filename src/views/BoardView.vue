@@ -189,7 +189,7 @@ const boards = computed(() => boardStore.boards)
 const lists = computed(() => listStore.lists)
 
 const searchQuery = ref('')
-const sortField = ref<'created_at' | 'updated_at' | 'priority' | 'due_date' | 'title'>('created_at')
+const sortField = ref<'updated_at' | 'priority' | 'due_date' | 'title'>('updated_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 
 const filteredCards = computed(() => {
@@ -220,7 +220,7 @@ const filteredCards = computed(() => {
       return ((priorityOrder[bVal as string] ?? 4) - (priorityOrder[aVal as string] ?? 4)) * dir
     }
 
-    if (field === 'due_date' || field === 'created_at' || field === 'updated_at') {
+    if (field === 'due_date' || field === 'updated_at') {
       return (new Date(aVal).getTime() - new Date(bVal).getTime()) * dir
     }
 
