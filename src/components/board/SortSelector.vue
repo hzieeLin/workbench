@@ -1,16 +1,16 @@
 <template>
-  <div class="sort-selector">
-    <select v-model="selectedSort">
-      <option value="created_at">创建时间</option>
-      <option value="updated_at">更新时间</option>
-      <option value="priority">优先级</option>
-      <option value="due_date">截止日期</option>
-      <option value="title">标题</option>
-    </select>
-    <button @click="toggleDirection" class="direction-btn" :title="direction === 'asc' ? '升序' : '降序'">
+  <a-space>
+    <a-select v-model:value="selectedSort" @change="handleSort" style="width: 140px">
+      <a-select-option value="created_at">创建时间</a-select-option>
+      <a-select-option value="updated_at">更新时间</a-select-option>
+      <a-select-option value="priority">优先级</a-select-option>
+      <a-select-option value="due_date">截止日期</a-select-option>
+      <a-select-option value="title">标题</a-select-option>
+    </a-select>
+    <a-button @click="toggleDirection">
       {{ direction === 'asc' ? '↑' : '↓' }}
-    </button>
-  </div>
+    </a-button>
+  </a-space>
 </template>
 
 <script setup lang="ts">
@@ -27,49 +27,19 @@ const emit = defineEmits<{
 
 const selectedSort = ref(props.currentSort)
 
-watch(() => props.currentSort, (newVal) => {
-  selectedSort.value = newVal
-})
+watch(
+  () => props.currentSort,
+  (newVal) => {
+    selectedSort.value = newVal
+  }
+)
 
-watch(selectedSort, (newVal) => {
-  emit('sort', newVal, props.direction)
-})
+function handleSort() {
+  emit('sort', selectedSort.value, props.direction)
+}
 
 function toggleDirection() {
   const newDirection = props.direction === 'asc' ? 'desc' : 'asc'
   emit('sort', selectedSort.value, newDirection)
 }
 </script>
-
-<style scoped>
-.sort-selector {
-  display: flex;
-  gap: 4px;
-}
-
-.sort-selector select {
-  padding: 6px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.direction-btn {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  border-radius: var(--radius-md);
-}
-
-.direction-btn:hover {
-  background: var(--color-surface-hover);
-}
-</style>
