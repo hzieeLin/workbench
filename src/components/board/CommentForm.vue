@@ -1,14 +1,17 @@
 <template>
   <div class="comment-form">
-    <textarea
-      v-model="content"
+    <a-textarea
+      v-model:value="content"
       placeholder="添加评论..."
+      :auto-size="{ minRows: 3, maxRows: 6 }"
       @keydown.enter.meta="handleSubmit"
       @keydown.enter.ctrl="handleSubmit"
     />
     <div class="form-actions">
       <span class="hint">⌘ + Enter 发送</span>
-      <button @click="handleSubmit" :disabled="!content.trim()" class="btn-primary">发送</button>
+      <a-button type="primary" size="small" :disabled="!content.trim()" @click="handleSubmit">
+        发送
+      </a-button>
     </div>
   </div>
 </template>
@@ -31,25 +34,10 @@ function handleSubmit() {
 
 <style scoped>
 .comment-form {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--ant-color-border, #f0f0f0);
+  border-radius: var(--ant-border-radius-lg, 12px);
   padding: 12px;
-}
-
-.comment-form textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 8px;
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-  font-size: 14px;
-  resize: vertical;
-  outline: none;
-}
-
-.comment-form textarea::placeholder {
-  color: var(--color-text-tertiary);
+  margin-bottom: 12px;
 }
 
 .form-actions {
@@ -61,26 +49,6 @@ function handleSubmit() {
 
 .hint {
   font-size: 12px;
-  color: var(--color-text-tertiary);
-}
-
-.btn-primary {
-  padding: 6px 12px;
-  border: 1px solid var(--color-accent);
-  background: var(--color-accent);
-  color: white;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-strong);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
 }
 </style>
