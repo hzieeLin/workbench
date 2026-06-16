@@ -1,9 +1,46 @@
 <template>
   <div class="board-view">
     <div class="board-header">
-      <div>
+      <div class="board-title-group">
         <p class="eyebrow">任务看板</p>
-        <h2>{{ currentBoard?.name || '请选择一个看板' }}</h2>
+        <div class="board-title-row">
+          <input
+            v-if="editingTitle"
+            ref="titleInput"
+            v-model="editingTitleValue"
+            class="board-title-input"
+            @blur="saveBoardTitle"
+            @keydown.enter="saveBoardTitle"
+            @keydown.escape="editingTitle = false"
+          />
+          <h2 v-else @dblclick="startEditTitle">{{ currentBoard?.name || '请选择一个看板' }}</h2>
+          <div class="board-switcher">
+            <button class="btn-switch" @click="showBoardSwitcher = !showBoardSwitcher">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path
+                  d="M3 5.5L7 9.5L11 5.5"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <div v-if="showBoardSwitcher" class="board-dropdown">
+              <div
+                v-for="b in boards"
+                :key="b.id"
+                class="board-dropdown-item"
+                :class="{ active: currentBoard?.id === b.id }"
+                @click="switchBoard(b)"
+                @contextmenu.prevent="openContextMenu($event, b)"
+              >
+                <span class="board-dot" :style="{ background: boardColor(b.id) }" />
+                <span>{{ b.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="board-actions">
         <ViewSwitcher :current-view="currentView" @change="currentView = $event" />
@@ -20,15 +57,35 @@
         </button>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="contextMenu.visible"
+        class="context-menu"
+        :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
+        @click="contextMenu.visible = false"
+      >
+        <div class="context-menu-item danger" @click="handleDeleteBoard">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M2 4h10M5 4V2.5a1 1 0 011-1h2a1 1 0 011 1V4M11 4v7.5a1 1 0 01-1 1H4a1 1 0 01-1-1V4"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>删除看板</span>
+        </div>
+      </div>
+    </Teleport>
     <div class="board-toolbar" v-if="currentBoard">
       <SearchBar :result-count="filteredCardsCount" @search="handleSearch" />
-      <FilterPanel :available-labels="availableLabels" @filter="handleFilter" />
+      <FilterPanel @filter="handleFilter" />
       <SortSelector :current-sort="sortField" :direction="sortDirection" @sort="handleSort" />
     </div>
     <ActiveFilters
       v-if="hasActiveFilters"
       :filters="activeFilters"
-      :available-labels="availableLabels"
       @update:filters="updateFilters"
     />
     <div class="board-content" v-if="currentBoard">
@@ -44,7 +101,6 @@
         v-else-if="currentView === 'list'"
         :cards="filteredCards"
         :lists="lists"
-        :card-labels="cardLabels"
         @edit="openCardDetail"
         @delete="deleteCard"
       />
@@ -53,11 +109,6 @@
         :cards="filteredCards"
         @edit="openCardDetail"
         @update="handleCardUpdate"
-      />
-      <TimelineView
-        v-else-if="currentView === 'timeline'"
-        :cards="filteredCards"
-        @edit="openCardDetail"
       />
     </div>
     <div v-else class="empty-state">
@@ -95,12 +146,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import { useListStore } from '@/stores/list'
 import { useCardStore } from '@/stores/card'
-import { useLabelStore } from '@/stores/label'
 import { Card } from '@/database/entities/Card'
+import { Board } from '@/database/entities/Board'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
 import CardDetailModal from '@/components/board/CardDetailModal.vue'
@@ -111,27 +162,44 @@ import SortSelector from '@/components/board/SortSelector.vue'
 import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
 import ListView from '@/components/board/ListView.vue'
 import CalendarView from '@/components/board/CalendarView.vue'
-import TimelineView from '@/components/board/TimelineView.vue'
 
 const boardStore = useBoardStore()
 const listStore = useListStore()
 const cardStore = useCardStore()
-const labelStore = useLabelStore()
 
 const showCreateList = ref(false)
 const selectedCard = ref<Card | null>(null)
 const currentView = ref('board')
+const showBoardSwitcher = ref(false)
+
+const editingTitle = ref(false)
+const editingTitleValue = ref('')
+const titleInput = ref<HTMLInputElement | null>(null)
+
+function startEditTitle() {
+  if (!currentBoard.value) return
+  editingTitle.value = true
+  editingTitleValue.value = currentBoard.value.name
+  setTimeout(() => titleInput.value?.focus(), 0)
+}
+
+async function saveBoardTitle() {
+  editingTitle.value = false
+  const name = editingTitleValue.value.trim()
+  if (!name || !currentBoard.value || name === currentBoard.value.name) return
+  await boardStore.updateBoard(currentBoard.value.id, { name })
+}
+
+const contextMenu = ref({ visible: false, x: 0, y: 0, board: null as Board | null })
 
 const currentBoard = computed(() => boardStore.currentBoard)
+const boards = computed(() => boardStore.boards)
 const lists = computed(() => listStore.lists)
-const availableLabels = computed(() => labelStore.labels)
-const cardLabels = computed(() => cardStore.cardLabels)
 
 const searchQuery = ref('')
-const activeFilters = ref<{ priorities: string[]; due: string[]; labels: number[] }>({
+const activeFilters = ref<{ priorities: string[]; due: string[] }>({
   priorities: [],
   due: [],
-  labels: [],
 })
 const sortField = ref<'created_at' | 'updated_at' | 'priority' | 'due_date' | 'title'>('created_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
@@ -180,16 +248,6 @@ const filteredCards = computed(() => {
     })
   }
 
-  if (activeFilters.value.labels.length > 0) {
-    result = result.filter((card) => {
-      const labels = cardLabels.value.get(card.id)
-      if (!labels || labels.length === 0) return false
-      return activeFilters.value.labels.some((labelId) =>
-        labels.some((l) => l.id === labelId)
-      )
-    })
-  }
-
   const field = sortField.value
   const dir = sortDirection.value === 'asc' ? 1 : -1
 
@@ -219,11 +277,7 @@ const filteredCards = computed(() => {
 const filteredCardsCount = computed(() => filteredCards.value.length)
 
 const hasActiveFilters = computed(() => {
-  return (
-    activeFilters.value.priorities.length > 0 ||
-    activeFilters.value.due.length > 0 ||
-    activeFilters.value.labels.length > 0
-  )
+  return activeFilters.value.priorities.length > 0 || activeFilters.value.due.length > 0
 })
 
 const filteredLists = computed(() => {
@@ -243,17 +297,68 @@ onMounted(() => {
   const savedSortDirection = localStorage.getItem('sortDirection')
   if (savedSortField) sortField.value = savedSortField as typeof sortField.value
   if (savedSortDirection) sortDirection.value = savedSortDirection as typeof sortDirection.value
+
+  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('click', closeContextMenu)
 })
+
+function handleClickOutside(e: MouseEvent) {
+  if (!(e.target as HTMLElement).closest('.board-switcher')) {
+    showBoardSwitcher.value = false
+  }
+}
+
+function closeContextMenu() {
+  contextMenu.value = { visible: false, x: 0, y: 0, board: null }
+}
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('click', closeContextMenu)
+})
+
+const boardColors = ['#FF6B4A', '#4AD9D9', '#FFC043', '#4CDF8B', '#A78BFA', '#FF5E5E']
+
+function boardColor(id: number) {
+  return boardColors[id % boardColors.length]
+}
+
+function switchBoard(board: Board) {
+  boardStore.setCurrentBoard(board)
+  showBoardSwitcher.value = false
+}
+
+function openContextMenu(e: MouseEvent, board: Board) {
+  contextMenu.value = { visible: true, x: e.clientX, y: e.clientY, board }
+}
+
+async function handleDeleteBoard() {
+  const board = contextMenu.value.board
+  if (!board) return
+  if (!confirm(`确定要删除看板「${board.name}」吗？此操作不可撤销。`)) return
+
+  const boardsList = boards.value
+  const idx = boardsList.findIndex((b) => b.id === board.id)
+  const nextBoard = boardsList[idx + 1] || boardsList[idx - 1] || null
+
+  await boardStore.deleteBoard(board.id)
+
+  if (currentBoard.value === null && nextBoard) {
+    boardStore.setCurrentBoard(nextBoard)
+  }
+
+  contextMenu.value = { visible: false, x: 0, y: 0, board: null }
+}
 
 function handleSearch(query: string) {
   searchQuery.value = query
 }
 
-function handleFilter(filters: { priorities: string[]; due: string[]; labels: number[] }) {
+function handleFilter(filters: { priorities: string[]; due: string[] }) {
   activeFilters.value = filters
 }
 
-function updateFilters(filters: { priorities: string[]; due: string[]; labels: number[] }) {
+function updateFilters(filters: { priorities: string[]; due: string[] }) {
   activeFilters.value = filters
 }
 
@@ -268,8 +373,6 @@ watch(currentBoard, async (board) => {
   if (board) {
     await listStore.fetchLists(board.id)
     await cardStore.fetchCardsByBoard(board.id)
-    await labelStore.fetchLabels(board.id)
-    await cardStore.fetchCardLabelsByBoard(board.id)
   }
 })
 
@@ -288,10 +391,11 @@ async function handleCardUpdate(card: Card, newDate: string) {
 
 <style scoped>
 .board-view {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   animation: boardFadeIn 0.4s ease;
 }
 
@@ -331,6 +435,98 @@ async function handleCardUpdate(card: Card, newDate: string) {
   color: var(--color-text);
 }
 
+.board-title-input {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text);
+  padding: 0 4px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-elevated);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.board-title-group {
+  min-width: 0;
+}
+
+.board-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.board-title-row h2 {
+  margin: 0;
+}
+
+.board-switcher {
+  position: relative;
+}
+
+.btn-switch {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-switch:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.board-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+  min-width: 180px;
+  padding: 4px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.board-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.board-dropdown-item:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.board-dropdown-item.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.board-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .board-actions button {
   display: flex;
   align-items: center;
@@ -359,6 +555,7 @@ async function handleCardUpdate(card: Card, newDate: string) {
 
 .board-toolbar {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
@@ -370,6 +567,7 @@ async function handleCardUpdate(card: Card, newDate: string) {
   gap: 14px;
   overflow-x: auto;
   padding: 2px 2px 18px;
+  min-height: 0;
 }
 
 .board-columns {
@@ -407,5 +605,43 @@ async function handleCardUpdate(card: Card, newDate: string) {
   max-width: 360px;
   line-height: 1.7;
   font-size: 14px;
+}
+</style>
+
+<style>
+.context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 140px;
+  padding: 4px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.context-menu-item:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.context-menu-item.danger {
+  color: var(--color-red);
+}
+
+.context-menu-item.danger:hover {
+  background: var(--color-red-soft);
 }
 </style>

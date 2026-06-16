@@ -7,14 +7,26 @@
         <button @click="navigateNext" class="nav-btn">→</button>
       </div>
       <div class="view-toggle">
-        <button :class="['toggle-btn', { active: viewMode === 'month' }]" @click="viewMode = 'month'">月</button>
-        <button :class="['toggle-btn', { active: viewMode === 'week' }]" @click="viewMode = 'week'">周</button>
+        <button
+          :class="['toggle-btn', { active: viewMode === 'month' }]"
+          @click="viewMode = 'month'"
+        >
+          月
+        </button>
+        <button :class="['toggle-btn', { active: viewMode === 'week' }]" @click="viewMode = 'week'">
+          周
+        </button>
       </div>
     </div>
 
     <!-- Month View -->
     <div v-if="viewMode === 'month'" class="calendar-grid">
-      <div v-for="day in monthDays" :key="day.dateStr" class="calendar-day" :class="{ today: day.isToday, 'other-month': day.isOtherMonth }">
+      <div
+        v-for="day in monthDays"
+        :key="day.dateStr"
+        class="calendar-day"
+        :class="{ today: day.isToday, 'other-month': day.isOtherMonth }"
+      >
         <span class="day-number">{{ day.day }}</span>
         <div
           class="day-cards"
@@ -38,7 +50,12 @@
     <!-- Week View -->
     <div v-else class="week-view">
       <div class="week-header">
-        <div v-for="day in weekDays" :key="day.dateStr" class="week-day-header" :class="{ today: day.isToday }">
+        <div
+          v-for="day in weekDays"
+          :key="day.dateStr"
+          class="week-day-header"
+          :class="{ today: day.isToday }"
+        >
           <span class="week-day-name">{{ day.dayName }}</span>
           <span class="week-day-number">{{ day.day }}</span>
         </div>
@@ -104,7 +121,7 @@ function getWeekStart(date: Date): Date {
 }
 
 function getCardsForDate(dateStr: string): Card[] {
-  return props.cards.filter(card => {
+  return props.cards.filter((card) => {
     if (!card.due_date) return false
     return new Date(card.due_date).toISOString().slice(0, 10) === dateStr
   })
@@ -126,7 +143,7 @@ const monthDays = computed(() => {
       day: d.getDate(),
       isToday: false,
       isOtherMonth: true,
-      cards: getCardsForDate(d.toISOString().slice(0, 10))
+      cards: getCardsForDate(d.toISOString().slice(0, 10)),
     })
   }
 
@@ -138,7 +155,7 @@ const monthDays = computed(() => {
       day: d,
       isToday: date.toDateString() === today.toDateString(),
       isOtherMonth: false,
-      cards: getCardsForDate(dateStr)
+      cards: getCardsForDate(dateStr),
     })
   }
 
@@ -160,7 +177,7 @@ const weekDays = computed(() => {
       day: date.getDate(),
       dayName: dayNames[i],
       isToday: date.toDateString() === today.toDateString(),
-      cards: getCardsForDate(dateStr)
+      cards: getCardsForDate(dateStr),
     })
   }
 
@@ -207,6 +224,9 @@ function onDrop(_event: DragEvent, dateStr: string) {
 
 <style scoped>
 .calendar-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 16px;
 }
 

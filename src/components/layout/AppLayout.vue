@@ -61,7 +61,10 @@ import StatusBar from './StatusBar.vue'
 
 .content {
   flex: 1;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 24px 28px;
+  min-height: 0;
 }
 </style>
