@@ -80,7 +80,6 @@
     </Teleport>
     <div class="board-toolbar" v-if="currentBoard">
       <SearchBar :result-count="filteredCardsCount" @search="handleSearch" />
-      <SortSelector :current-sort="sortField" :direction="sortDirection" @sort="handleSort" />
     </div>
     <div class="board-content" v-if="currentBoard">
       <BoardColumn
@@ -150,7 +149,6 @@ import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
 import CardDetailModal from '@/components/board/CardDetailModal.vue'
 import SearchBar from '@/components/board/SearchBar.vue'
-import SortSelector from '@/components/board/SortSelector.vue'
 import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
 import ListView from '@/components/board/ListView.vue'
 import CalendarView from '@/components/board/CalendarView.vue'
@@ -189,8 +187,6 @@ const boards = computed(() => boardStore.boards)
 const lists = computed(() => listStore.lists)
 
 const searchQuery = ref('')
-const sortField = ref<'updated_at' | 'priority' | 'due_date' | 'title'>('updated_at')
-const sortDirection = ref<'asc' | 'desc'>('desc')
 
 const filteredCards = computed(() => {
   let result = [...cardStore.cards]
@@ -203,29 +199,6 @@ const filteredCards = computed(() => {
         (card.description && card.description.toLowerCase().includes(query))
     )
   }
-
-  const field = sortField.value
-  const dir = sortDirection.value === 'asc' ? 1 : -1
-
-  result.sort((a, b) => {
-    const aVal = a[field]
-    const bVal = b[field]
-
-    if (aVal == null && bVal == null) return 0
-    if (aVal == null) return 1
-    if (bVal == null) return -1
-
-    if (field === 'priority') {
-      const priorityOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 }
-      return ((priorityOrder[bVal as string] ?? 4) - (priorityOrder[aVal as string] ?? 4)) * dir
-    }
-
-    if (field === 'due_date' || field === 'updated_at') {
-      return (new Date(aVal).getTime() - new Date(bVal).getTime()) * dir
-    }
-
-    return String(aVal).localeCompare(String(bVal)) * dir
-  })
 
   return result
 })
@@ -245,11 +218,6 @@ function getFilteredListCards(listId: number) {
 }
 
 onMounted(() => {
-  const savedSortField = localStorage.getItem('sortField')
-  const savedSortDirection = localStorage.getItem('sortDirection')
-  if (savedSortField) sortField.value = savedSortField as typeof sortField.value
-  if (savedSortDirection) sortDirection.value = savedSortDirection as typeof sortDirection.value
-
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('click', closeContextMenu)
 })
@@ -304,13 +272,6 @@ async function handleDeleteBoard() {
 
 function handleSearch(query: string) {
   searchQuery.value = query
-}
-
-function handleSort(field: string, direction: string) {
-  sortField.value = field as typeof sortField.value
-  sortDirection.value = direction as typeof sortDirection.value
-  localStorage.setItem('sortField', field)
-  localStorage.setItem('sortDirection', direction)
 }
 
 watch(currentBoard, async (board) => {

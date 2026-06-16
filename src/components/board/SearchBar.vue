@@ -49,12 +49,12 @@ defineExpose({ highlightText })
 
 <style scoped>
 .search-bar {
-  min-width: 280px;
+  width: 250px;
 }
 
 .result-count {
   font-size: 12px;
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
+  color: var(--ant-color-text-secondary);
   white-space: nowrap;
   margin-left: 8px;
 }
