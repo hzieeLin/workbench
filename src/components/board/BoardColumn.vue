@@ -1,32 +1,37 @@
 <template>
-  <div class="board-column" :class="{ 'drag-over': isDragOver }">
-    <div class="column-header">
+  <a-card
+    class="board-column"
+    :class="{ 'drag-over': isDragOver }"
+    size="small"
+    @dragenter="handleDragEnter"
+    @dragleave="handleDragLeave"
+  >
+    <template #title>
       <div class="column-title-group">
         <span class="column-bullet" />
-        <h3>{{ list.name }}</h3>
-        <span class="card-count">{{ cards.length }}</span>
+        <span>{{ list.name }}</span>
+        <a-badge :count="cards.length" :number-style="{ backgroundColor: 'var(--ant-color-text-secondary)' }" />
       </div>
-      <div class="menu-wrapper">
-        <button class="btn-icon" @click="showMenu = !showMenu">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="4" r="1.5" fill="currentColor" />
-            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-            <circle cx="8" cy="12" r="1.5" fill="currentColor" />
-          </svg>
-        </button>
-        <div v-if="showMenu" class="dropdown-menu" @click.stop>
-          <button class="dropdown-item danger" @click="handleDeleteList">删除列表</button>
-        </div>
-      </div>
-    </div>
+    </template>
+    <template #extra>
+      <a-dropdown :trigger="['click']">
+        <a-button type="text" size="small">
+          <template #icon><MoreOutlined /></template>
+        </a-button>
+        <template #overlay>
+          <a-menu>
+            <a-menu-item key="delete" danger @click="handleDeleteList">删除列表</a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
+    </template>
+
     <div
       class="column-cards"
       ref="columnCardsRef"
       :class="{ 'has-drop-after': isDragOver && dropIndex === cards.length }"
-      @dragenter="handleDragEnter"
       @dragover.prevent="handleDragOver"
-      @dragleave="handleDragLeave"
-      @drop="handleDrop"
+      @drop.prevent="handleDrop"
     >
       <TransitionGroup name="card-list">
         <TaskCard
@@ -35,20 +40,18 @@
           :card="card"
           :class="{ 'drop-before': isDragOver && dropIndex === index }"
           draggable="true"
-          @dragstart="handleDragStart(card)"
+          @dragstart="handleDragStart($event, card)"
           @click="emit('select-card', card)"
         />
       </TransitionGroup>
     </div>
-    <button class="add-card-btn" @click="showCreateCard = true">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-      </svg>
-      <span>添加卡片</span>
-    </button>
+    <a-button block dashed @click="showCreateCard = true">
+      <template #icon><PlusOutlined /></template>
+      添加卡片
+    </a-button>
 
     <CreateCardModal v-if="showCreateCard" :list-id="list.id" @close="showCreateCard = false" />
-  </div>
+  </a-card>
 </template>
 
 <script setup lang="ts">
@@ -59,6 +62,7 @@ import { useCardStore } from '@/stores/card'
 import { useListStore } from '@/stores/list'
 import TaskCard from './TaskCard.vue'
 import CreateCardModal from './CreateCardModal.vue'
+import { MoreOutlined, PlusOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
   list: List
@@ -72,7 +76,6 @@ const emit = defineEmits<{
 const cardStore = useCardStore()
 const listStore = useListStore()
 const showCreateCard = ref(false)
-const showMenu = ref(false)
 const columnCardsRef = ref<HTMLElement | null>(null)
 const isDragOver = ref(false)
 const dropIndex = ref(0)
@@ -82,40 +85,49 @@ const cards = computed(
   () => props.filteredCards ?? cardStore.cards.filter((c) => c.list_id === props.list.id)
 )
 
-function handleClickOutside(e: MouseEvent) {
-  const target = e.target as HTMLElement
-  if (!target.closest('.menu-wrapper')) {
-    showMenu.value = false
-  }
-}
-
-onMounted(() => document.addEventListener('click', handleClickOutside))
-onUnmounted(() => document.removeEventListener('click', handleClickOutside))
-
 onMounted(async () => {
   await cardStore.fetchCards(props.list.id)
 })
 
-function handleDragStart(card: Card) {
+function handleDragStart(event: DragEvent, card: Card) {
   localStorage.setItem('draggedCard', JSON.stringify(card))
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+  }
 }
 
-function handleDrop(_event: DragEvent) {
+function handleDrop(event: DragEvent) {
   isDragOver.value = false
   dragEnterCounter = 0
+
   const cardData = localStorage.getItem('draggedCard')
-  if (cardData) {
-    const card: Card = JSON.parse(cardData)
-    let targetPosition = dropIndex.value + 1
-    if (card.list_id === props.list.id) {
-      const currentIndex = cards.value.findIndex((c) => c.id === card.id)
-      if (currentIndex !== -1 && dropIndex.value > currentIndex) {
-        targetPosition = dropIndex.value
+  if (!cardData) return
+
+  const container = columnCardsRef.value
+  let dropIdx = dropIndex.value
+  if (container) {
+    const els = container.querySelectorAll('.task-card')
+    let idx = els.length
+    for (let i = 0; i < els.length; i++) {
+      const rect = els[i].getBoundingClientRect()
+      if (event.clientY < rect.top + rect.height / 2) {
+        idx = i
+        break
       }
     }
-    cardStore.moveCard(card.id, props.list.id, targetPosition)
-    localStorage.removeItem('draggedCard')
+    dropIdx = idx
   }
+
+  const card: Card = JSON.parse(cardData)
+  let targetPosition = dropIdx + 1
+  if (card.list_id === props.list.id) {
+    const currentIndex = cards.value.findIndex((c) => c.id === card.id)
+    if (currentIndex !== -1 && dropIdx > currentIndex) {
+      targetPosition = dropIdx
+    }
+  }
+  cardStore.moveCard(card.id, props.list.id, targetPosition)
+  localStorage.removeItem('draggedCard')
 }
 
 function handleDragEnter() {
@@ -127,13 +139,21 @@ function handleDragOver(event: DragEvent) {
   const container = columnCardsRef.value
   if (!container) return
 
+  const scrollZone = 40
+  const scrollSpeed = 6
+  const containerRect = container.getBoundingClientRect()
+  if (event.clientY < containerRect.top + scrollZone) {
+    container.scrollTop -= scrollSpeed
+  } else if (event.clientY > containerRect.bottom - scrollZone) {
+    container.scrollTop += scrollSpeed
+  }
+
   const cardElements = container.querySelectorAll('.task-card')
-  let idx = cardElements.length
+  let idx = cards.value.length
 
   for (let i = 0; i < cardElements.length; i++) {
     const rect = cardElements[i].getBoundingClientRect()
-    const midY = rect.top + rect.height / 2
-    if (event.clientY < midY) {
+    if (event.clientY < rect.top + rect.height / 2) {
       idx = i
       break
     }
@@ -151,11 +171,8 @@ function handleDragLeave() {
 }
 
 async function handleDeleteList() {
-  showMenu.value = false
-  if (confirm(`确定要删除列表「${props.list.name}」及其所有卡片吗？`)) {
-    await listStore.deleteList(props.list.id)
-    cardStore.removeCardsByList(props.list.id)
-  }
+  await listStore.deleteList(props.list.id)
+  cardStore.removeCardsByList(props.list.id)
 }
 </script>
 
@@ -163,126 +180,35 @@ async function handleDeleteList() {
 .board-column {
   min-width: 292px;
   max-width: 292px;
-  background: var(--color-surface-glass);
-  backdrop-filter: var(--blur-sm);
-  -webkit-backdrop-filter: var(--blur-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  max-height: 100%;
+  height: 100%;
+  min-height: 0;
   transition: border-color 0.2s ease;
 }
 
 .board-column:hover {
-  border-color: var(--color-border-hover);
-}
-
-.column-header {
-  padding: 16px 14px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border-color: var(--ant-color-border-hover, #40a9ff);
 }
 
 .column-title-group {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
 }
 
 .column-bullet {
   width: 8px;
   height: 8px;
   border-radius: 2px;
-  background: var(--color-accent);
+  background: var(--ant-color-primary, #FF6B4A);
   flex-shrink: 0;
   opacity: 0.6;
 }
 
-.column-header h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  background: var(--color-surface);
-  padding: 1px 7px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.btn-icon {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-tertiary);
-  transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text-secondary);
-}
-
-.menu-wrapper {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  z-index: 10;
-  min-width: 130px;
-  padding: 4px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-}
-
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  transition: all 0.15s ease;
-}
-
-.dropdown-item:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
-}
-
-.dropdown-item.danger {
-  color: var(--color-red);
-}
-
-.dropdown-item.danger:hover {
-  background: var(--color-red-soft);
-}
-
 .column-cards {
-  flex: 1;
+  min-height: 40px;
+  max-height: calc(100vh - 300px);
   overflow-y: auto;
-  padding: 0 10px;
+  margin-bottom: 10px;
 }
 
 .card-list-move {
@@ -315,9 +241,9 @@ async function handleDeleteList() {
   left: 6px;
   right: 6px;
   height: 3px;
-  background: var(--color-accent);
+  background: var(--ant-color-primary, #FF6B4A);
   border-radius: 2px;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 10px rgba(255, 107, 74, 0.5);
   z-index: 2;
   animation: indicatorPulse 1.2s ease-in-out infinite;
 }
@@ -326,16 +252,15 @@ async function handleDeleteList() {
   content: '';
   display: block;
   height: 3px;
-  background: var(--color-accent);
+  background: var(--ant-color-primary, #FF6B4A);
   border-radius: 2px;
   margin: 2px 6px 0;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 10px rgba(255, 107, 74, 0.5);
   animation: indicatorPulse 1.2s ease-in-out infinite;
 }
 
 .board-column.drag-over {
-  border-color: var(--color-accent);
-  background: rgba(99, 102, 241, 0.04);
+  border-color: var(--ant-color-primary, #FF6B4A);
 }
 
 @keyframes indicatorPulse {
@@ -346,29 +271,5 @@ async function handleDeleteList() {
   50% {
     opacity: 1;
   }
-}
-
-.add-card-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 10px;
-  min-height: 36px;
-  padding: 8px;
-  background: transparent;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  color: var(--color-text-tertiary);
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.add-card-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
 }
 </style>
