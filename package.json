@@ -46,6 +46,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "antd": "^6.4.4",
     "chart.js": "^4.5.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
