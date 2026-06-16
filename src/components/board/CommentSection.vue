@@ -2,21 +2,18 @@
   <div class="comment-section">
     <h4>评论 ({{ comments.length }})</h4>
 
-    <div class="comment-list">
-      <CommentItem
-        v-for="comment in comments"
-        :key="comment.id"
-        :comment="comment"
-        @delete="deleteComment"
-      />
-    </div>
-
     <CommentForm @submit="addComment" />
+
+    <a-list :data-source="reversedComments" size="small" class="comment-list">
+      <template #renderItem="{ item: comment }">
+        <CommentItem :comment="comment" @delete="deleteComment" />
+      </template>
+    </a-list>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCommentStore } from '@/stores/comment'
 import CommentItem from './CommentItem.vue'
 import CommentForm from './CommentForm.vue'
@@ -27,6 +24,8 @@ const props = defineProps<{
 
 const commentStore = useCommentStore()
 const comments = ref(commentStore.comments)
+
+const reversedComments = computed(() => [...comments.value].reverse())
 
 onMounted(async () => {
   await commentStore.fetchComments(props.cardId)
@@ -46,22 +45,19 @@ async function deleteComment(id: number) {
 
 <style scoped>
 .comment-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .comment-section h4 {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 16px;
-  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
 }
 
 .comment-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+  background: transparent;
 }
 </style>
