@@ -29,7 +29,6 @@ function getThemeConfig() {
       },
     }
   }
-  }
 
   watch(isDark, (val) => {
     localStorage.setItem('theme', val ? 'dark' : 'light')
