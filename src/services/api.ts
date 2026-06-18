@@ -33,6 +33,13 @@ export const apiClient = {
       body: JSON.stringify(body),
     })
   },
+  put<T>(path: string, body: JsonBody) {
+    return request<T>(path, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+  },
   patch<T>(path: string, body: JsonBody) {
     return request<T>(path, {
       method: 'PATCH',
