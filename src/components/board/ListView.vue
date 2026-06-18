@@ -107,10 +107,10 @@ function isOverdue(date: Date): boolean {
 }
 
 .overdue {
-  color: var(--ant-color-error, #ff4d4f);
+  color: var(--ant-color-error);
 }
 
 .no-date {
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
+  color: var(--ant-color-text-secondary);
 }
 </style>

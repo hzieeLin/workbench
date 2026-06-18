@@ -21,7 +21,7 @@ export class Comment {
   @Column({ type: 'text' })
   content!: string
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'datetime' })
   created_at!: Date
 
   @ManyToOne('Card', (card: any) => card.comments)

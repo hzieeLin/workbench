@@ -1,7 +1,6 @@
 import type { Board } from './entities/Board'
 import type { List } from './entities/List'
 import type { Card } from './entities/Card'
-import type { Label } from './entities/Label'
 import type { TimeBlock } from './entities/TimeBlock'
 import type { Comment } from './entities/Comment'
 
@@ -160,9 +159,9 @@ export const mockDB = {
         created_at: new Date(),
         updated_at: new Date(),
         list: undefined,
-        cardLabels: [],
         timeBlocks: [],
         comments: [],
+        todos: [],
       }
       const cards = getStorage<Card>('db_cards')
       cards.push(card)
@@ -204,51 +203,6 @@ export const mockDB = {
         cards = cards.filter((c) => c.priority === options.where!.priority)
       }
       return cards.length
-    },
-  },
-
-  labels: {
-    find(): Label[] {
-      return getStorage<Label>('db_labels')
-    },
-    create(data: Partial<Label>): Label {
-      const label: Label = {
-        id: generateId(),
-        board_id: data.board_id || 0,
-        name: data.name || '',
-        color: data.color || '#999',
-        cardLabels: [],
-      }
-      const labels = getStorage<Label>('db_labels')
-      labels.push(label)
-      setStorage('db_labels', labels)
-      return label
-    },
-    async save(label: Label): Promise<Label> {
-      const labels = getStorage<Label>('db_labels')
-      const index = labels.findIndex((l) => l.id === label.id)
-      if (index >= 0) {
-        labels[index] = { ...labels[index], ...label }
-      } else {
-        labels.push(label)
-      }
-      setStorage('db_labels', labels)
-      return label
-    },
-    async update(id: number, data: Partial<Label>): Promise<void> {
-      const labels = getStorage<Label>('db_labels')
-      const index = labels.findIndex((l) => l.id === id)
-      if (index >= 0) {
-        labels[index] = { ...labels[index], ...data }
-        setStorage('db_labels', labels)
-      }
-    },
-    async delete(id: number): Promise<void> {
-      const labels = getStorage<Label>('db_labels')
-      setStorage(
-        'db_labels',
-        labels.filter((l) => l.id !== id)
-      )
     },
   },
 

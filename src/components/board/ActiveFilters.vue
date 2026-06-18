@@ -75,13 +75,13 @@ function clearAll() {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--ant-color-primary-bg, #fff2e8);
-  border-radius: var(--ant-border-radius-lg, 12px);
+  background: var(--ant-color-primary-bg);
+  border-radius: var(--ant-border-radius-lg);
 }
 
 .filters-label {
   font-size: 12px;
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
+  color: var(--ant-color-text-secondary);
   white-space: nowrap;
 }
 </style>

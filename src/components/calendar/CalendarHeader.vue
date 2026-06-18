@@ -71,12 +71,12 @@ const viewOptions = [
   gap: 16px;
   padding: 0 0 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--ant-color-border, #f0f0f0);
+  border-bottom: 1px solid var(--ant-color-border);
 }
 
 .header-left .eyebrow {
   margin-bottom: 4px;
-  color: var(--ant-color-primary, #FF6B4A);
+  color: var(--ant-color-primary);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;

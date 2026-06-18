@@ -1,14 +1,28 @@
-import dotenv from 'dotenv'
+import { join } from 'path'
+import { existsSync, mkdirSync } from 'fs'
 
-dotenv.config()
+function getDbPath(): string {
+  if (process.env.DB_PATH) return process.env.DB_PATH
+
+  const appName = 'TaskFlow'
+  let baseDir: string
+
+  if (process.platform === 'win32') {
+    baseDir = join(process.env.APPDATA || '', appName)
+  } else if (process.platform === 'darwin') {
+    baseDir = join(process.env.HOME || '', 'Library', 'Application Support', appName)
+  } else {
+    baseDir = join(process.env.HOME || '', `.${appName.toLowerCase()}`)
+  }
+
+  if (!existsSync(baseDir)) {
+    mkdirSync(baseDir, { recursive: true })
+  }
+
+  return join(baseDir, 'data.db')
+}
 
 export const config = {
   apiPort: Number(process.env.API_PORT) || 3001,
-  db: {
-    host: process.env.DB_HOST ?? 'localhost',
-    port: Number(process.env.DB_PORT) || 3306,
-    username: process.env.DB_USERNAME ?? 'root',
-    password: process.env.DB_PASSWORD ?? '',
-    database: process.env.DB_DATABASE ?? 'task_orchestrator',
-  },
+  dbPath: getDbPath(),
 }

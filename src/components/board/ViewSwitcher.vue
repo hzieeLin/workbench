@@ -1,9 +1,5 @@
 <template>
-  <a-segmented
-    v-model:value="currentValue"
-    :options="viewOptions"
-    @change="handleChange"
-  />
+  <a-segmented v-model:value="currentValue" :options="viewOptions" @change="handleChange" />
 </template>
 
 <script setup lang="ts">

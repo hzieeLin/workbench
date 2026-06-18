@@ -17,14 +17,20 @@
           <a-form-item label="描述">
             <a-textarea v-model:value="editDescription" placeholder="添加描述..." :rows="4" />
           </a-form-item>
+          <TodoList :card-id="card.id" />
           <a-row :gutter="12">
             <a-col :span="12">
               <a-form-item label="优先级">
-                <a-select v-model:value="editPriority">
-                  <a-select-option value="low">低</a-select-option>
-                  <a-select-option value="medium">中</a-select-option>
-                  <a-select-option value="high">高</a-select-option>
-                </a-select>
+                <div class="priority-picker">
+                  <button
+                    v-for="p in priorities"
+                    :key="p.value"
+                    class="priority-swatch"
+                    :class="[`swatch-${p.value}`, { active: editPriority === p.value }]"
+                    :title="p.label"
+                    @click="editPriority = p.value"
+                  />
+                </div>
               </a-form-item>
             </a-col>
             <a-col :span="12">
@@ -57,6 +63,7 @@ import { ref } from 'vue'
 import { Card } from '@/database/entities/Card'
 import { useCardStore } from '@/stores/card'
 import CommentSection from './CommentSection.vue'
+import TodoList from './TodoList.vue'
 import { DeleteOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 
@@ -71,12 +78,16 @@ const emit = defineEmits<{
 const cardStore = useCardStore()
 const visible = ref(true)
 
+const priorities = [
+  { value: 'low' as const, label: '低' },
+  { value: 'medium' as const, label: '中' },
+  { value: 'high' as const, label: '高' },
+]
+
 const editTitle = ref(props.card.title)
 const editDescription = ref(props.card.description || '')
 const editPriority = ref(props.card.priority)
-const editDueDate = ref(
-  props.card.due_date ? dayjs(props.card.due_date) : null
-)
+const editDueDate = ref(props.card.due_date ? dayjs(props.card.due_date) : null)
 
 async function handleSave() {
   await cardStore.updateCard(props.card.id, {
@@ -93,3 +104,42 @@ async function handleDelete() {
   emit('close')
 }
 </script>
+
+<style scoped>
+.priority-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.priority-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.priority-swatch:hover {
+  transform: scale(1.1);
+}
+
+.priority-swatch.active {
+  border-color: var(--color-text);
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-text);
+}
+
+.swatch-low {
+  background: #4cdf8b;
+}
+
+.swatch-medium {
+  background: #ffc043;
+}
+
+.swatch-high {
+  background: #ff5e5e;
+}
+</style>

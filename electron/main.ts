@@ -1,12 +1,33 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { existsSync, mkdirSync } from 'fs'
 import type { Server } from 'http'
 
 let apiServer: Server | null = null
 
+function getDbPath(): string {
+  const appName = 'TaskFlow'
+  let baseDir: string
+
+  if (process.platform === 'win32') {
+    baseDir = join(process.env.APPDATA || '', appName)
+  } else if (process.platform === 'darwin') {
+    baseDir = join(process.env.HOME || '', 'Library', 'Application Support', appName)
+  } else {
+    baseDir = join(process.env.HOME || '', `.${appName.toLowerCase()}`)
+  }
+
+  if (!existsSync(baseDir)) {
+    mkdirSync(baseDir, { recursive: true })
+  }
+
+  return join(baseDir, 'data.db')
+}
+
 async function startBundledApi() {
   if (process.env.NODE_ENV === 'development' || apiServer) return
 
+  process.env.DB_PATH = getDbPath()
   const serverModule = await import(join(__dirname, '../dist-server/server/http.js'))
   apiServer = await serverModule.startApiServer()
 }

@@ -48,7 +48,7 @@ body {
 }
 
 :root {
-  --color-accent: #FF6B4A;
+  --color-accent: #ff6b4a;
   --color-accent-soft: rgba(255, 107, 74, 0.1);
   --color-accent-strong: #e85a3a;
 
@@ -85,7 +85,7 @@ body {
 }
 
 .dark {
-  --color-accent: #FF6B4A;
+  --color-accent: #ff6b4a;
   --color-accent-soft: rgba(255, 107, 74, 0.15);
   --color-accent-strong: #ff8066;
 

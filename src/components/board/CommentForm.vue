@@ -33,8 +33,8 @@ function handleSubmit() {
 
 <style scoped>
 .comment-form {
-  border: 1px solid var(--ant-color-border, #f0f0f0);
-  border-radius: var(--ant-border-radius-lg, 12px);
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius-lg);
   padding: 12px;
   margin-bottom: 12px;
 }
@@ -48,6 +48,6 @@ function handleSubmit() {
 
 .hint {
   font-size: 12px;
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
+  color: var(--ant-color-text-secondary);
 }
 </style>

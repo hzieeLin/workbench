@@ -18,10 +18,10 @@ export class Board {
   @Column({ type: 'text', nullable: true })
   description?: string
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'datetime' })
   created_at!: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'datetime' })
   updated_at!: Date
 
   @OneToMany('List', (list: any) => list.board)

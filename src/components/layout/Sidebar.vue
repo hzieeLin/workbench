@@ -43,19 +43,25 @@
               @keydown.escape="cancelEdit"
               @click.stop
             />
-            <span v-else class="board-name" @dblclick.stop="startEdit(board)">{{ board.name }}</span>
+            <span v-else class="board-name" @dblclick.stop="startEdit(board)">{{
+              board.name
+            }}</span>
           </a-list-item>
         </template>
       </a-list>
 
-      <a-form v-if="showCreateBoard" @finish="handleCreateBoard" layout="vertical" size="small">
+      <a-form v-if="showCreateBoard" layout="vertical" size="small">
         <a-form-item>
-          <a-input v-model:value="newBoardName" placeholder="看板名称" />
+          <a-input
+            v-model:value="newBoardName"
+            placeholder="看板名称"
+            @pressEnter="handleCreateBoard"
+          />
         </a-form-item>
-        <a-space>
+        <div style="display: flex; gap: 8px">
           <a-button @click="cancelCreateBoard">取消</a-button>
-          <a-button type="primary" html-type="submit">创建</a-button>
-        </a-space>
+          <a-button type="primary" @click="handleCreateBoard">创建</a-button>
+        </div>
       </a-form>
       <a-button v-else block dashed @click="showCreateBoard = true">
         <template #icon><PlusOutlined /></template>
@@ -64,12 +70,10 @@
     </div>
 
     <a-dropdown :trigger="['contextmenu']" v-model:open="contextMenuVisible">
-      <div />
+      <span></span>
       <template #overlay>
         <a-menu>
-          <a-menu-item key="delete" danger @click="handleDeleteBoard">
-            删除看板
-          </a-menu-item>
+          <a-menu-item key="delete" danger @click="handleDeleteBoard"> 删除看板 </a-menu-item>
         </a-menu>
       </template>
     </a-dropdown>
@@ -78,7 +82,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
 import { Board } from '@/database/entities/Board'
 import {
@@ -89,8 +93,9 @@ import {
 } from '@ant-design/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
 const boardStore = useBoardStore()
-const boards = ref<Board[]>([])
+const boards = computed(() => boardStore.boards)
 const showCreateBoard = ref(false)
 const newBoardName = ref('')
 
@@ -113,7 +118,6 @@ async function saveBoardName(board: Board) {
   editingBoardId.value = null
   if (!name || name === board.name) return
   await boardStore.updateBoard(board.id, { name })
-  boards.value = boardStore.boards
 }
 
 function cancelEdit() {
@@ -131,14 +135,22 @@ function boardColor(id: number) {
 
 onMounted(async () => {
   await boardStore.fetchBoards()
-  boards.value = boardStore.boards
-  if (!boardStore.currentBoard && boards.value.length > 0) {
-    boardStore.setCurrentBoard(boards.value[0])
+  if (!boardStore.currentBoard && boardStore.boards.length > 0) {
+    boardStore.setCurrentBoard(boardStore.boards[0])
   }
 })
 
 function selectBoard(board: Board) {
+  if (boardStore.currentBoard?.id === board.id) {
+    if (route.path !== '/') {
+      router.push('/')
+    }
+    return
+  }
   boardStore.setCurrentBoard(board)
+  if (route.path !== '/') {
+    router.push('/')
+  }
 }
 
 function openContextMenu(_e: MouseEvent, board: Board) {
@@ -154,7 +166,6 @@ async function handleDeleteBoard() {
   const nextBoard = boards.value[idx + 1] || boards.value[idx - 1] || null
 
   await boardStore.deleteBoard(board.id)
-  boards.value = boardStore.boards
 
   if (boardStore.currentBoard === null && nextBoard) {
     boardStore.setCurrentBoard(nextBoard)
@@ -170,24 +181,29 @@ function cancelCreateBoard() {
 
 async function handleCreateBoard() {
   const name = newBoardName.value.trim()
+  console.log('handleCreateBoard called, name:', name)
   if (!name) return
 
-  const board = await boardStore.createBoard(name)
-  boards.value = boardStore.boards
-  boardStore.setCurrentBoard(board)
-  cancelCreateBoard()
+  try {
+    const board = await boardStore.createBoard(name)
+    console.log('Board created:', board)
+    boardStore.setCurrentBoard(board)
+    cancelCreateBoard()
+  } catch (e) {
+    console.error('Create board failed:', e)
+  }
 }
 </script>
 
 <style scoped>
 .sidebar {
-  background: var(--ant-color-bg-container, #fff);
-  border-right: 1px solid var(--ant-color-border, #f0f0f0);
+  background: var(--ant-color-bg-container);
+  border-right: 1px solid var(--ant-color-border);
 }
 
 .logo {
   padding: 22px 22px 18px;
-  border-bottom: 1px solid var(--ant-color-border, #f0f0f0);
+  border-bottom: 1px solid var(--ant-color-border);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -195,7 +211,7 @@ async function handleCreateBoard() {
 
 .logo-mark {
   font-size: 22px;
-  color: var(--ant-color-primary, #FF6B4A);
+  color: var(--ant-color-primary);
 }
 
 .logo h1 {
@@ -203,6 +219,7 @@ async function handleCreateBoard() {
   font-size: 22px;
   font-weight: 600;
   font-style: italic;
+  color: var(--ant-color-text);
 }
 
 .nav-menu {
@@ -224,7 +241,7 @@ async function handleCreateBoard() {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
+  color: var(--ant-color-text-secondary);
 }
 
 .board-list {
@@ -237,11 +254,11 @@ async function handleCreateBoard() {
 }
 
 .board-item:hover {
-  background: var(--ant-color-bg-text-hover, rgba(0,0,0,0.04));
+  background: var(--ant-color-bg-text-hover);
 }
 
 .board-item.active {
-  background: var(--ant-color-bg-text-hover, rgba(0,0,0,0.04));
+  background: var(--ant-color-bg-text-hover);
 }
 
 .board-dot {
@@ -255,5 +272,6 @@ async function handleCreateBoard() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--ant-color-text);
 }
 </style>

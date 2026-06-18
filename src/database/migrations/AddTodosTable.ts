@@ -1,23 +1,24 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class AddCommentsTable1710000000001 implements MigrationInterface {
-  name = 'AddCommentsTable1710000000001'
+export class AddTodosTable1710000000002 implements MigrationInterface {
+  name = 'AddTodosTable1710000000002'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE comments (
+      CREATE TABLE todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         card_id INTEGER NOT NULL,
-        author TEXT NOT NULL,
-        content TEXT NOT NULL,
+        text TEXT NOT NULL,
+        completed INTEGER DEFAULT 0,
+        position INTEGER NOT NULL,
         created_at TEXT DEFAULT (datetime('now','localtime')),
         FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
       )
     `)
-    await queryRunner.query(`CREATE INDEX idx_comments_card_id ON comments(card_id)`)
+    await queryRunner.query(`CREATE INDEX idx_todos_card_id ON todos(card_id)`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP TABLE comments')
+    await queryRunner.query('DROP TABLE todos')
   }
 }

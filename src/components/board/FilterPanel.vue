@@ -1,17 +1,15 @@
 <template>
   <div class="filter-panel">
-    <a-button
-      v-if="hasAnySelection"
-      size="small"
-      @click="clearAll"
-    >
-      清除全部
-    </a-button>
+    <a-button v-if="hasAnySelection" size="small" @click="clearAll"> 清除全部 </a-button>
     <a-collapse v-model:activeKey="activeKeys" :bordered="false" ghost>
       <a-collapse-panel key="priority" header="优先级">
         <a-checkbox-group v-model:value="selectedPriorities" @change="emitFilters">
           <a-space direction="vertical">
-            <a-checkbox v-for="priority in priorities" :key="priority.value" :value="priority.value">
+            <a-checkbox
+              v-for="priority in priorities"
+              :key="priority.value"
+              :value="priority.value"
+            >
               <span class="priority-dot" :class="priority.value" />
               {{ priority.label }}
             </a-checkbox>
@@ -85,9 +83,9 @@ function emitFilters() {
   display: flex;
   gap: 16px;
   padding: 12px;
-  background: var(--ant-color-bg-container, #fff);
-  border: 1px solid var(--ant-color-border, #f0f0f0);
-  border-radius: var(--ant-border-radius-lg, 12px);
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius-lg);
   align-items: flex-start;
 }
 
@@ -100,14 +98,14 @@ function emitFilters() {
 }
 
 .priority-dot.low {
-  background: var(--ant-color-success, #52c41a);
+  background: var(--ant-color-success);
 }
 
 .priority-dot.medium {
-  background: var(--ant-color-warning, #faad14);
+  background: var(--ant-color-warning);
 }
 
 .priority-dot.high {
-  background: var(--ant-color-error, #ff4d4f);
+  background: var(--ant-color-error);
 }
 </style>

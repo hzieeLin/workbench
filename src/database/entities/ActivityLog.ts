@@ -8,9 +8,9 @@ export class ActivityLog {
   @Column()
   card_id!: number
 
-  @Column({ type: 'enum', enum: ['created', 'updated', 'completed', 'deleted'] })
+  @Column({ type: 'text' })
   action!: 'created' | 'updated' | 'completed' | 'deleted'
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'text' })
   timestamp!: Date
 }

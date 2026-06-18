@@ -4,8 +4,8 @@ import type { DataSource } from 'typeorm'
 import { createBoardRouter } from './routes/boards'
 import { createCardRouter } from './routes/cards'
 import { createCommentRouter } from './routes/comments'
-import { createLabelRouter } from './routes/labels'
 import { createListRouter } from './routes/lists'
+import { createTodoRouter } from './routes/todos'
 
 export function createApp(dataSource?: DataSource) {
   const app = express()
@@ -24,7 +24,7 @@ export function createApp(dataSource?: DataSource) {
     app.use('/api', createListRouter(dataSource))
     app.use('/api', createCardRouter(dataSource))
     app.use('/api', createCommentRouter(dataSource))
-    app.use('/api', createLabelRouter(dataSource))
+    app.use('/api', createTodoRouter(dataSource))
   }
 
   const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {

@@ -1,4 +1,5 @@
 import type { Server } from 'http'
+import { writeFileSync } from 'fs'
 import { createApp } from './app'
 import { config } from './config'
 import { createDataSource } from './data-source'
@@ -15,6 +16,11 @@ export async function startApiServer(): Promise<Server> {
 
   server.on('close', () => {
     if (dataSource.isInitialized) {
+      const sqlJs = (dataSource.driver as any).databaseConnection
+      if (sqlJs && typeof sqlJs.export === 'function') {
+        const data = sqlJs.export()
+        writeFileSync(config.dbPath, Buffer.from(data))
+      }
       void dataSource.destroy()
     }
   })

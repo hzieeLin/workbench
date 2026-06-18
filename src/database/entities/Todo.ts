@@ -4,20 +4,22 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
 } from 'typeorm'
 
-@Entity('lists')
-export class List {
+@Entity('todos')
+export class Todo {
   @PrimaryGeneratedColumn()
   id!: number
 
   @Column()
-  board_id!: number
+  card_id!: number
 
   @Column()
-  name!: string
+  text!: string
+
+  @Column({ default: false })
+  completed!: boolean
 
   @Column()
   position!: number
@@ -25,10 +27,7 @@ export class List {
   @CreateDateColumn({ type: 'datetime' })
   created_at!: Date
 
-  @ManyToOne('Board', (board: any) => board.lists)
-  @JoinColumn({ name: 'board_id' })
-  board!: any
-
-  @OneToMany('Card', (card: any) => card.list)
-  cards!: any[]
+  @ManyToOne('Card', (card: any) => card.todos)
+  @JoinColumn({ name: 'card_id' })
+  card!: any
 }

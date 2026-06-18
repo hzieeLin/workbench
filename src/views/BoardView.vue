@@ -244,6 +244,8 @@ function boardColor(id: number) {
 }
 
 function switchBoard(board: Board) {
+  listStore.lists = []
+  cardStore.cards = []
   boardStore.setCurrentBoard(board)
   showBoardSwitcher.value = false
 }
@@ -274,12 +276,21 @@ function handleSearch(query: string) {
   searchQuery.value = query
 }
 
-watch(currentBoard, async (board) => {
-  if (board) {
-    await listStore.fetchLists(board.id)
-    await cardStore.fetchCardsByBoard(board.id)
-  }
-})
+watch(
+  currentBoard,
+  async (board) => {
+    if (board) {
+      listStore.lists = []
+      cardStore.cards = []
+      await listStore.fetchLists(board.id)
+      await cardStore.fetchCardsByBoard(board.id)
+    } else {
+      listStore.lists = []
+      cardStore.cards = []
+    }
+  },
+  { immediate: true }
+)
 
 function openCardDetail(card: Card) {
   selectedCard.value = card

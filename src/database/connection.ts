@@ -3,15 +3,12 @@ import { DataSource } from 'typeorm'
 import { Board } from './entities/Board'
 import { List } from './entities/List'
 import { Card } from './entities/Card'
-import { Label } from './entities/Label'
-import { CardLabel } from './entities/CardLabel'
 import { TimeBlock } from './entities/TimeBlock'
 import { CalendarEvent } from './entities/CalendarEvent'
 import { ActivityLog } from './entities/ActivityLog'
 import { Comment } from './entities/Comment'
 import { InitialSchema1710000000000 } from './migrations/InitialSchema'
 import { AddCommentsTable1710000000001 } from './migrations/AddCommentsTable'
-import { AddLabelBoardId1710000000002 } from './migrations/AddLabelBoardId'
 
 const isBrowser = typeof window !== 'undefined'
 
@@ -60,22 +57,15 @@ export function getDataSource(): DataSource {
   }
 
   const env = typeof process !== 'undefined' ? process.env : {}
+  const dbPath = env.DB_PATH || './data.db'
 
   _dataSource = new DataSource({
-    type: 'mysql',
-    host: env.DB_HOST ?? 'localhost',
-    port: Number(env.DB_PORT) || 3306,
-    username: env.DB_USERNAME ?? 'root',
-    password: env.DB_PASSWORD ?? '',
-    database: env.DB_DATABASE ?? 'task_orchestrator',
+    type: 'sqljs',
+    database: dbPath,
     synchronize: false,
     logging: false,
-    entities: [Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment],
-    migrations: [
-      InitialSchema1710000000000,
-      AddCommentsTable1710000000001,
-      AddLabelBoardId1710000000002,
-    ],
+    entities: [Board, List, Card, TimeBlock, CalendarEvent, ActivityLog, Comment],
+    migrations: [InitialSchema1710000000000, AddCommentsTable1710000000001],
     subscribers: [],
   })
 
@@ -95,4 +85,4 @@ export async function initializeDatabase() {
   }
 }
 
-export { Board, List, Card, Label, CardLabel, TimeBlock, CalendarEvent, ActivityLog, Comment }
+export { Board, List, Card, TimeBlock, CalendarEvent, ActivityLog, Comment }

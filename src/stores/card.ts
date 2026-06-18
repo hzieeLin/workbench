@@ -2,12 +2,10 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Card } from '@/database/entities/Card'
 import type { List } from '@/database/entities/List'
-import type { Label } from '@/database/entities/Label'
 import { apiClient } from '@/services/api'
 
 export const useCardStore = defineStore('card', () => {
   const cards = ref<Card[]>([])
-  const cardLabels = ref<Map<number, Label[]>>(new Map())
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -112,25 +110,8 @@ export const useCardStore = defineStore('card', () => {
     }
   }
 
-  async function fetchCardLabelsByBoard(boardId: number) {
-    error.value = null
-    try {
-      const result = await apiClient.get<Record<number, Label[]>>(
-        `/boards/${boardId}/card-labels`
-      )
-      const map = new Map<number, Label[]>()
-      for (const [cardId, labels] of Object.entries(result)) {
-        map.set(Number(cardId), labels)
-      }
-      cardLabels.value = map
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e)
-    }
-  }
-
   return {
     cards,
-    cardLabels,
     loading,
     error,
     fetchCards,
@@ -140,6 +121,5 @@ export const useCardStore = defineStore('card', () => {
     deleteCard,
     removeCardsByList,
     moveCard,
-    fetchCardLabelsByBoard,
   }
 })

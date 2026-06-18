@@ -8,7 +8,12 @@
     />
     <div class="actions">
       <a-space>
-        <a-button type="text" shape="circle" @click="themeStore.toggleTheme()" :title="themeStore.isDark ? '切换到浅色主题' : '切换到深色主题'">
+        <a-button
+          type="text"
+          shape="circle"
+          @click="themeStore.toggleTheme()"
+          :title="themeStore.isDark ? '切换到浅色主题' : '切换到深色主题'"
+        >
           <template #icon>
             <BulbFilled v-if="themeStore.isDark" />
             <BulbOutlined v-else />
@@ -38,8 +43,8 @@ const searchQuery = ref('')
 <style scoped>
 .topbar {
   height: 60px;
-  background: var(--ant-color-bg-container, #fff);
-  border-bottom: 1px solid var(--ant-color-border, #f0f0f0);
+  background: var(--ant-color-bg-container);
+  border-bottom: 1px solid var(--ant-color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;

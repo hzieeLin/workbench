@@ -23,7 +23,7 @@ export class Card {
   @Column({ type: 'text', nullable: true })
   description?: string
 
-  @Column({ type: 'enum', enum: ['low', 'medium', 'high'], default: 'medium' })
+  @Column({ type: 'text', default: 'medium' })
   priority!: 'low' | 'medium' | 'high'
 
   @Column({ type: 'datetime', nullable: true })
@@ -32,22 +32,22 @@ export class Card {
   @Column()
   position!: number
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'datetime' })
   created_at!: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'datetime' })
   updated_at!: Date
 
   @ManyToOne('List', (list: any) => list.cards)
   @JoinColumn({ name: 'list_id' })
   list!: any
 
-  @OneToMany('CardLabel', (cardLabel: any) => cardLabel.card)
-  cardLabels!: any[]
-
   @OneToMany('TimeBlock', (timeBlock: any) => timeBlock.card)
   timeBlocks!: any[]
 
   @OneToMany('Comment', (comment: any) => comment.card)
   comments!: any[]
+
+  @OneToMany('Todo', (todo: any) => todo.card)
+  todos!: any[]
 }

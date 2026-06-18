@@ -54,7 +54,7 @@ async function deleteComment(id: number) {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.45));
+  color: var(--ant-color-text-secondary);
 }
 
 .comment-list {

@@ -15,9 +15,7 @@
       <p>{{ comment.content }}</p>
     </template>
     <template #actions>
-      <span v-if="comment.author === '用户'" key="delete" @click="handleDelete">
-        删除
-      </span>
+      <span v-if="comment.author === '用户'" key="delete" @click="handleDelete"> 删除 </span>
     </template>
   </a-comment>
 </template>

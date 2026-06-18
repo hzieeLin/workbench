@@ -1,7 +1,6 @@
 import type { Board } from './entities/Board'
 import type { List } from './entities/List'
 import type { Card } from './entities/Card'
-import type { Label } from './entities/Label'
 import type { TimeBlock } from './entities/TimeBlock'
 
 let nextId = 1
@@ -109,9 +108,9 @@ export const db = {
         created_at: new Date(),
         updated_at: new Date(),
         list: undefined,
-        cardLabels: [],
         timeBlocks: [],
         comments: [],
+        todos: [],
       }
       const all = load<Card>('c')
       all.push(c)
@@ -169,38 +168,6 @@ export const db = {
         })
         save('c', [...srcCards, ...tgtCards])
       }
-    },
-  },
-  labels: {
-    find(): Label[] {
-      return load<Label>('lb')
-    },
-    create(d: Partial<Label>): Label {
-      const l: Label = {
-        id: genId(),
-        board_id: d.board_id || 0,
-        name: d.name || '',
-        color: d.color || '#999',
-        cardLabels: [],
-      }
-      const all = load<Label>('lb')
-      all.push(l)
-      save('lb', all)
-      return l
-    },
-    async update(id: number, d: Partial<Label>) {
-      const all = load<Label>('lb')
-      const i = all.findIndex((x) => x.id === id)
-      if (i >= 0) {
-        all[i] = { ...all[i], ...d }
-        save('lb', all)
-      }
-    },
-    async delete(id: number) {
-      save(
-        'lb',
-        load<Label>('lb').filter((x) => x.id !== id)
-      )
     },
   },
   timeBlocks: {

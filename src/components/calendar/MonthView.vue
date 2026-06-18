@@ -1,5 +1,5 @@
 <template>
-  <a-calendar :value="currentDate" @select="handleSelect" class="month-view">
+  <a-calendar :value="calendarValue" @select="handleSelect" class="month-view">
     <template #dateCell="{ current }">
       <div class="day-events">
         <div
@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { TimeBlock } from '@/database/entities/TimeBlock'
 import dayjs from 'dayjs'
 
@@ -29,6 +30,8 @@ const emit = defineEmits<{
   'create-block': [start: Date, end: Date]
 }>()
 
+const calendarValue = computed(() => dayjs(props.currentDate))
+
 function handleSelect(date: dayjs.Dayjs) {
   emit('select-date', date.toDate())
 }
@@ -41,8 +44,8 @@ function getBlocksForDay(date: Date): TimeBlock[] {
 }
 
 function getBlockColor(block: TimeBlock): string {
-  if (block.card_id) return 'var(--ant-color-primary, #FF6B4A)'
-  return 'var(--ant-color-text-secondary, rgba(0,0,0,0.45))'
+  if (block.card_id) return 'var(--ant-color-primary)'
+  return 'var(--ant-color-text-secondary)'
 }
 </script>
 
