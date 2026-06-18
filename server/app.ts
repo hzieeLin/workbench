@@ -6,6 +6,7 @@ import { createCardRouter } from './routes/cards'
 import { createCommentRouter } from './routes/comments'
 import { createListRouter } from './routes/lists'
 import { createTodoRouter } from './routes/todos'
+import { createFocusRouter } from './routes/focus'
 
 export function createApp(dataSource?: DataSource) {
   const app = express()
@@ -25,6 +26,7 @@ export function createApp(dataSource?: DataSource) {
     app.use('/api', createCardRouter(dataSource))
     app.use('/api', createCommentRouter(dataSource))
     app.use('/api', createTodoRouter(dataSource))
+    app.use('/api', createFocusRouter(dataSource))
   }
 
   const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {

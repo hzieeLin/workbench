@@ -50,4 +50,7 @@ export class Card {
 
   @OneToMany('Todo', (todo: any) => todo.card)
   todos!: any[]
+
+  @OneToMany('DailyFocusOverride', (override: any) => override.card)
+  focusOverrides?: any[]
 }

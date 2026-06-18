@@ -9,9 +9,11 @@ import { Comment } from '../src/database/entities/Comment'
 import { List } from '../src/database/entities/List'
 import { TimeBlock } from '../src/database/entities/TimeBlock'
 import { Todo } from '../src/database/entities/Todo'
+import { DailyFocusOverride } from '../src/database/entities/DailyFocusOverride'
 import { InitialSchema1710000000000 } from '../src/database/migrations/InitialSchema'
 import { AddCommentsTable1710000000001 } from '../src/database/migrations/AddCommentsTable'
 import { AddTodosTable1710000000002 } from '../src/database/migrations/AddTodosTable'
+import { AddDailyFocusOverridesTable1710000000003 } from '../src/database/migrations/AddDailyFocusOverridesTable'
 import { config } from './config'
 
 export function createDataSource() {
@@ -25,11 +27,22 @@ export function createDataSource() {
     database: dbData,
     synchronize: false,
     logging: false,
-    entities: [Board, List, Card, TimeBlock, CalendarEvent, ActivityLog, Comment, Todo],
+    entities: [
+      Board,
+      List,
+      Card,
+      TimeBlock,
+      CalendarEvent,
+      ActivityLog,
+      Comment,
+      Todo,
+      DailyFocusOverride,
+    ],
     migrations: [
       InitialSchema1710000000000,
       AddCommentsTable1710000000001,
       AddTodosTable1710000000002,
+      AddDailyFocusOverridesTable1710000000003,
     ],
   })
 }
