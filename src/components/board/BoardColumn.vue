@@ -92,6 +92,7 @@ const emit = defineEmits<{
   (e: 'select-card', card: Card): void
   (e: 'toggle-focus', cardId: number): void
   (e: 'cards-changed'): void
+  (e: 'list-changed'): void
 }>()
 
 const cardStore = useCardStore()
@@ -122,6 +123,7 @@ async function saveTitle() {
   const name = editingTitleValue.value.trim()
   if (!name || name === props.list.name) return
   await listStore.updateList(props.list.id, { name })
+  emit('list-changed')
 }
 
 const cards = computed(
@@ -217,6 +219,7 @@ function handleDragLeave() {
 async function handleDeleteList() {
   await listStore.deleteList(props.list.id)
   cardStore.removeCardsByList(props.list.id)
+  emit('list-changed')
 }
 </script>
 

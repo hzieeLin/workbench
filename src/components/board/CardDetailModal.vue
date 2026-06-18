@@ -79,6 +79,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: []
   saved: []
+  deleted: []
   'toggle-focus': [cardId: number]
 }>()
 
@@ -109,6 +110,7 @@ async function handleSave() {
 
 async function handleDelete() {
   await cardStore.deleteCard(props.card.id)
+  emit('deleted')
   emit('close')
 }
 </script>

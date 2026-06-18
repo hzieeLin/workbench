@@ -108,6 +108,7 @@
         @select-card="openCardDetail"
         @toggle-focus="handleToggleFocus"
         @cards-changed="refreshFocus"
+        @list-changed="refreshFocus"
       />
       <ListView
         v-else-if="currentView === 'list'"
@@ -160,6 +161,7 @@
       :focus-saving="focusStore.savingCardIds.includes(selectedCard.id)"
       @toggle-focus="handleToggleFocus"
       @saved="refreshFocus"
+      @deleted="refreshFocus"
       @close="selectedCard = null"
     />
   </div>

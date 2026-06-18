@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import BoardView from '@/views/BoardView.vue'
+import BoardColumn from '@/components/board/BoardColumn.vue'
 import { useBoardStore } from '@/stores/board'
 import { apiClient } from '@/services/api'
 
@@ -85,5 +86,18 @@ describe('Kanban Enhancements Integration', () => {
     expect(wrapper.text()).toContain('今日聚焦')
     expect(wrapper.text()).toContain('Test Card')
     expect(wrapper.text()).toContain('1 项逾期')
+  })
+
+  it('refreshes focus when a list completion name changes', async () => {
+    const boardStore = useBoardStore()
+    boardStore.currentBoard = mockBoard as any
+    const wrapper = mount(BoardView)
+    await flushPromises()
+    ;(apiClient.get as jest.Mock).mockClear()
+
+    wrapper.findComponent(BoardColumn).vm.$emit('list-changed')
+    await flushPromises()
+
+    expect(apiClient.get).toHaveBeenCalledWith('/boards/1/focus?date=2026-06-18')
   })
 })
