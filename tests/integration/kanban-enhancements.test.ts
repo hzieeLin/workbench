@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import BoardView from '@/views/BoardView.vue'
 import { useBoardStore } from '@/stores/board'
@@ -9,6 +9,7 @@ jest.mock('@/services/api', () => ({
     get: jest.fn(),
     post: jest.fn(),
     patch: jest.fn(),
+    put: jest.fn(),
     delete: jest.fn(),
   },
 }))
@@ -30,13 +31,23 @@ describe('Kanban Enhancements Integration', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     ;(apiClient.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes('/focus')) {
+        return Promise.resolve({
+          date: '2026-06-18',
+          items: [{ card: mockCard, source: 'automatic', overdue: true }],
+          total: 1,
+          overdueCount: 1,
+        })
+      }
       if (url.includes('/lists') && !url.includes('/cards')) return Promise.resolve([mockList])
       if (url.includes('/cards')) return Promise.resolve([mockCard])
       return Promise.resolve([])
     })
     ;(apiClient.post as jest.Mock).mockResolvedValue({})
     ;(apiClient.patch as jest.Mock).mockResolvedValue({})
+    ;(apiClient.put as jest.Mock).mockResolvedValue({})
     ;(apiClient.delete as jest.Mock).mockResolvedValue({})
+    localStorage.clear()
   })
 
   it('renders board view', async () => {
@@ -61,5 +72,18 @@ describe('Kanban Enhancements Integration', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.board-content').exists()).toBe(true)
+  })
+
+  it('loads and renders today focus without blocking the board', async () => {
+    const boardStore = useBoardStore()
+    boardStore.currentBoard = mockBoard as any
+
+    const wrapper = mount(BoardView)
+    await flushPromises()
+
+    expect(apiClient.get).toHaveBeenCalledWith('/boards/1/focus?date=2026-06-18')
+    expect(wrapper.text()).toContain('今日聚焦')
+    expect(wrapper.text()).toContain('Test Card')
+    expect(wrapper.text()).toContain('1 项逾期')
   })
 })

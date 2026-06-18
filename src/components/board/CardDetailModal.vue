@@ -47,6 +47,9 @@
     </a-row>
     <template #footer>
       <a-space>
+        <a-button :loading="focusSaving" @click="emit('toggle-focus', card.id)">
+          {{ focused ? '移出今日聚焦' : '加入今日聚焦' }}
+        </a-button>
         <a-button danger @click="handleDelete">
           <template #icon><DeleteOutlined /></template>
           删除
@@ -69,10 +72,14 @@ import dayjs from 'dayjs'
 
 const props = defineProps<{
   card: Card
+  focused?: boolean
+  focusSaving?: boolean
 }>()
 
 const emit = defineEmits<{
   close: []
+  saved: []
+  'toggle-focus': [cardId: number]
 }>()
 
 const cardStore = useCardStore()
@@ -96,6 +103,7 @@ async function handleSave() {
     priority: editPriority.value,
     due_date: editDueDate.value ? editDueDate.value.toDate() : undefined,
   })
+  emit('saved')
   emit('close')
 }
 

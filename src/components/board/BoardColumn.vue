@@ -50,10 +50,13 @@
           v-for="(card, index) in cards"
           :key="card.id"
           :card="card"
+          :focused="focusedCardIds?.includes(card.id)"
+          :focus-saving="focusSavingIds?.includes(card.id)"
           :class="{ 'drop-before': isDragOver && dropIndex === index }"
           draggable="true"
           @dragstart="handleDragStart($event, card)"
           @click="emit('select-card', card)"
+          @toggle-focus="emit('toggle-focus', $event)"
         />
       </TransitionGroup>
     </div>
@@ -81,10 +84,14 @@ import CreateCardModal from './CreateCardModal.vue'
 const props = defineProps<{
   list: List
   filteredCards?: Card[]
+  focusedCardIds?: number[]
+  focusSavingIds?: number[]
 }>()
 
 const emit = defineEmits<{
   (e: 'select-card', card: Card): void
+  (e: 'toggle-focus', cardId: number): void
+  (e: 'cards-changed'): void
 }>()
 
 const cardStore = useCardStore()
@@ -132,7 +139,7 @@ function handleDragStart(event: DragEvent, card: Card) {
   }
 }
 
-function handleDrop(event: DragEvent) {
+async function handleDrop(event: DragEvent) {
   isDragOver.value = false
   dragEnterCounter = 0
 
@@ -162,7 +169,8 @@ function handleDrop(event: DragEvent) {
       targetPosition = dropIdx
     }
   }
-  cardStore.moveCard(card.id, props.list.id, targetPosition)
+  await cardStore.moveCard(card.id, props.list.id, targetPosition)
+  emit('cards-changed')
   localStorage.removeItem('draggedCard')
 }
 

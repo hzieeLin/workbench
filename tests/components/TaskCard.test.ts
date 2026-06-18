@@ -51,4 +51,15 @@ describe('TaskCard', () => {
     })
     expect(wrapper.classes()).toContain('priority-low')
   })
+
+  it('emits a focus toggle without triggering the task card click', async () => {
+    const wrapper = mount(TaskCard, {
+      props: { card: mockCard, focused: false },
+    })
+
+    await wrapper.get('[data-testid="task-focus-toggle"]').trigger('click')
+
+    expect(wrapper.emitted('toggle-focus')).toEqual([[mockCard.id]])
+    expect(wrapper.emitted('click')).toBeUndefined()
+  })
 })

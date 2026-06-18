@@ -58,6 +58,21 @@
       </div>
     </div>
 
+    <TodayFocusBar
+      v-if="currentBoard"
+      v-model:collapsed="focusCollapsed"
+      :items="focusStore.items"
+      :cards="cardStore.cards"
+      :completed-list-ids="completedListIds"
+      :overdue-count="focusStore.overdueCount"
+      :loading="focusStore.loading"
+      :error="focusStore.error"
+      @open-card="openCardDetail"
+      @include="handleFocusInclude"
+      @exclude="handleFocusExclude"
+      @retry="refreshFocus"
+    />
+
     <Teleport to="body">
       <div
         v-if="contextMenu.visible"
@@ -88,7 +103,11 @@
         :key="list.id"
         :list="list"
         :filtered-cards="getFilteredListCards(list.id)"
+        :focused-card-ids="focusedCardIds"
+        :focus-saving-ids="focusStore.savingCardIds"
         @select-card="openCardDetail"
+        @toggle-focus="handleToggleFocus"
+        @cards-changed="refreshFocus"
       />
       <ListView
         v-else-if="currentView === 'list'"
@@ -134,7 +153,15 @@
       :board-id="currentBoard.id"
     />
 
-    <CardDetailModal v-if="selectedCard" :card="selectedCard" @close="selectedCard = null" />
+    <CardDetailModal
+      v-if="selectedCard"
+      :card="selectedCard"
+      :focused="focusStore.isFocused(selectedCard.id)"
+      :focus-saving="focusStore.savingCardIds.includes(selectedCard.id)"
+      @toggle-focus="handleToggleFocus"
+      @saved="refreshFocus"
+      @close="selectedCard = null"
+    />
   </div>
 </template>
 
@@ -143,6 +170,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import { useListStore } from '@/stores/list'
 import { useCardStore } from '@/stores/card'
+import { localDateKey, useFocusStore } from '@/stores/focus'
 import { Card } from '@/database/entities/Card'
 import { Board } from '@/database/entities/Board'
 import BoardColumn from '@/components/board/BoardColumn.vue'
@@ -152,15 +180,18 @@ import SearchBar from '@/components/board/SearchBar.vue'
 import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
 import ListView from '@/components/board/ListView.vue'
 import CalendarView from '@/components/board/CalendarView.vue'
+import TodayFocusBar from '@/components/board/TodayFocusBar.vue'
 
 const boardStore = useBoardStore()
 const listStore = useListStore()
 const cardStore = useCardStore()
+const focusStore = useFocusStore()
 
 const showCreateList = ref(false)
 const selectedCard = ref<Card | null>(null)
 const currentView = ref('board')
 const showBoardSwitcher = ref(false)
+const focusCollapsed = ref(localStorage.getItem('taskflow.todayFocus.collapsed') === 'true')
 
 const editingTitle = ref(false)
 const editingTitleValue = ref('')
@@ -185,6 +216,10 @@ const contextMenu = ref({ visible: false, x: 0, y: 0, board: null as Board | nul
 const currentBoard = computed(() => boardStore.currentBoard)
 const boards = computed(() => boardStore.boards)
 const lists = computed(() => listStore.lists)
+const completedListIds = computed(() =>
+  lists.value.filter((list) => list.name.trim() === '已完成').map((list) => list.id)
+)
+const focusedCardIds = computed(() => focusStore.items.map((item) => item.card.id))
 
 const searchQuery = ref('')
 
@@ -220,6 +255,7 @@ function getFilteredListCards(listId: number) {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('click', closeContextMenu)
+  window.addEventListener('focus', handleWindowFocus)
 })
 
 function handleClickOutside(e: MouseEvent) {
@@ -235,6 +271,11 @@ function closeContextMenu() {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('click', closeContextMenu)
+  window.removeEventListener('focus', handleWindowFocus)
+})
+
+watch(focusCollapsed, (value) => {
+  localStorage.setItem('taskflow.todayFocus.collapsed', String(value))
 })
 
 const boardColors = ['#FF6B4A', '#4AD9D9', '#FFC043', '#4CDF8B', '#A78BFA', '#FF5E5E']
@@ -282,11 +323,16 @@ watch(
     if (board) {
       listStore.lists = []
       cardStore.cards = []
-      await listStore.fetchLists(board.id)
-      await cardStore.fetchCardsByBoard(board.id)
+      focusStore.clear()
+      await Promise.all([
+        listStore.fetchLists(board.id),
+        cardStore.fetchCardsByBoard(board.id),
+        focusStore.fetchFocus(board.id),
+      ])
     } else {
       listStore.lists = []
       cardStore.cards = []
+      focusStore.clear()
     }
   },
   { immediate: true }
@@ -302,6 +348,44 @@ function deleteCard(id: number) {
 
 async function handleCardUpdate(card: Card, newDate: string) {
   await cardStore.updateCard(card.id, { due_date: new Date(newDate) })
+  await refreshFocus()
+}
+
+async function refreshFocus() {
+  if (!currentBoard.value) return
+  await focusStore.fetchFocus(currentBoard.value.id)
+}
+
+async function handleToggleFocus(cardId: number) {
+  if (!currentBoard.value) return
+  const mode = focusStore.isFocused(cardId) ? 'exclude' : 'include'
+  try {
+    await focusStore.setFocus(cardId, mode, currentBoard.value.id)
+  } catch {
+    // The focus bar owns its non-blocking error state.
+  }
+}
+
+async function handleFocusInclude(cardId: number) {
+  if (!currentBoard.value) return
+  try {
+    await focusStore.setFocus(cardId, 'include', currentBoard.value.id)
+  } catch {
+    // The focus bar owns its non-blocking error state.
+  }
+}
+
+async function handleFocusExclude(cardId: number) {
+  if (!currentBoard.value) return
+  try {
+    await focusStore.setFocus(cardId, 'exclude', currentBoard.value.id)
+  } catch {
+    // The focus bar owns its non-blocking error state.
+  }
+}
+
+function handleWindowFocus() {
+  if (focusStore.currentDate && focusStore.currentDate !== localDateKey()) refreshFocus()
 }
 </script>
 

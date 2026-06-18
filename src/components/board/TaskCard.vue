@@ -1,5 +1,20 @@
 <template>
   <div class="task-card" :class="[`priority-${card.priority}`, { 'is-overdue': isOverdue }]">
+    <button
+      class="focus-toggle"
+      data-testid="task-focus-toggle"
+      type="button"
+      :class="{ active: focused }"
+      :disabled="focusSaving"
+      :title="focused ? '移出今日聚焦' : '加入今日聚焦'"
+      :aria-pressed="focused"
+      @click.stop="emit('toggle-focus', card.id)"
+    >
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3" />
+        <circle cx="7" cy="7" r="1.5" fill="currentColor" />
+      </svg>
+    </button>
     <div class="card-title">{{ card.title }}</div>
     <div class="card-meta">
       <span v-if="card.due_date" class="meta-item" :class="{ 'meta-overdue': isOverdue }">
@@ -51,6 +66,12 @@ import { useTodoStore } from '@/stores/todo'
 
 const props = defineProps<{
   card: Card
+  focused?: boolean
+  focusSaving?: boolean
+}>()
+
+const emit = defineEmits<{
+  'toggle-focus': [cardId: number]
 }>()
 
 const todoStore = useTodoStore()
@@ -95,6 +116,41 @@ function formatDate(date: Date) {
 
 .task-card:last-child {
   margin-bottom: 0;
+}
+
+.focus-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--color-text-tertiary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.task-card:hover .focus-toggle,
+.focus-toggle:focus-visible,
+.focus-toggle.active {
+  opacity: 1;
+}
+
+.focus-toggle:hover,
+.focus-toggle.active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.focus-toggle:disabled {
+  opacity: 0.45;
+  cursor: wait;
 }
 
 .task-card:hover {
@@ -154,7 +210,7 @@ function formatDate(date: Date) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-left: 8px;
+  padding: 0 26px 0 8px;
 }
 
 .card-meta {
