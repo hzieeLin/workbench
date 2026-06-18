@@ -23,8 +23,27 @@ export function createBoardRouter(dataSource: DataSource) {
       const name = String(req.body.name ?? '').trim()
       if (!name) return res.status(400).json({ error: 'Board name is required' })
 
-      const board = repo.create({ name, description: req.body.description })
-      res.status(201).json(await repo.save(board))
+      const board = await dataSource.transaction(async (manager) => {
+        const boardRepository = manager.getRepository(Board)
+        const listRepository = manager.getRepository(List)
+        const savedBoard = await boardRepository.save(
+          boardRepository.create({ name, description: req.body.description })
+        )
+        const defaultLists = [
+          { name: '待开始', position: 1 },
+          { name: '进行中', position: 2 },
+          { name: '已完成', position: 3 },
+        ].map((list) =>
+          listRepository.create({
+            board_id: savedBoard.id,
+            name: list.name,
+            position: list.position,
+          })
+        )
+        await listRepository.save(defaultLists)
+        return savedBoard
+      })
+      res.status(201).json(board)
     } catch (error) {
       next(error)
     }
