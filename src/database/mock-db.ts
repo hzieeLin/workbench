@@ -4,7 +4,7 @@ import type { Card } from './entities/Card'
 import type { TimeBlock } from './entities/TimeBlock'
 import type { Comment } from './entities/Comment'
 
-const isBrowser = typeof window !== 'undefined'
+const isBrowser = 'window' in globalThis
 
 let nextId = 1
 function generateId(): number {

@@ -69,7 +69,7 @@ describe('Comment API', () => {
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
         if (entity === Comment) return commentRepo
-        throw new Error('Unexpected repository')
+        return createRepo<any>()
       },
     } as any
     return { app: createApp(dataSource), commentRepo, cardRepo, listRepo }

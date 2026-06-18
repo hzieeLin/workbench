@@ -18,6 +18,9 @@ jest.mock('vue-router', () => ({
   useRoute: () => ({
     path: '/',
   }),
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
 }))
 
 describe('Sidebar', () => {

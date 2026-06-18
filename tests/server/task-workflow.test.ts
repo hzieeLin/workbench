@@ -72,7 +72,10 @@ describe('task workflow API', () => {
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
         if (entity === Comment) return createRepo<any>()
-        throw new Error('Unexpected repository')
+        return createRepo<any>()
+      },
+      async transaction(work: (manager: any) => Promise<any>) {
+        return work(this)
       },
     } as any
     const app = createApp(dataSource)
@@ -119,7 +122,7 @@ describe('task workflow API', () => {
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
         if (entity === Comment) return createRepo<any>()
-        throw new Error('Unexpected repository')
+        return createRepo<any>()
       },
     } as any
     const app = createApp(dataSource)
@@ -142,7 +145,7 @@ describe('task workflow API', () => {
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
         if (entity === Comment) return createRepo<any>()
-        throw new Error('Unexpected repository')
+        return createRepo<any>()
       },
     } as any
     const app = createApp(dataSource)
@@ -179,7 +182,7 @@ describe('task workflow API', () => {
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
         if (entity === Comment) return createRepo<any>()
-        throw new Error('Unexpected repository')
+        return createRepo<any>()
       },
     } as any
     const app = createApp(dataSource)
@@ -212,7 +215,7 @@ describe('task workflow API', () => {
         if (entity === List) return listRepo
         if (entity === Card) return cardRepo
         if (entity === Comment) return createRepo<any>()
-        throw new Error('Unexpected repository')
+        return createRepo<any>()
       },
     } as any
     const app = createApp(dataSource)

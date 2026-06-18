@@ -10,7 +10,7 @@ import { Comment } from './entities/Comment'
 import { InitialSchema1710000000000 } from './migrations/InitialSchema'
 import { AddCommentsTable1710000000001 } from './migrations/AddCommentsTable'
 
-const isBrowser = typeof window !== 'undefined'
+const isBrowser = 'window' in globalThis
 
 let _dataSource: DataSource | null = null
 
@@ -56,12 +56,15 @@ export function getDataSource(): DataSource {
     )
   }
 
-  const env = typeof process !== 'undefined' ? process.env : {}
+  const env =
+    (globalThis as typeof globalThis & { process?: { env?: Record<string, string | undefined> } })
+      .process?.env ?? {}
   const dbPath = env.DB_PATH || './data.db'
 
   _dataSource = new DataSource({
     type: 'sqljs',
-    database: dbPath,
+    location: dbPath,
+    autoSave: true,
     synchronize: false,
     logging: false,
     entities: [Board, List, Card, TimeBlock, CalendarEvent, ActivityLog, Comment],
