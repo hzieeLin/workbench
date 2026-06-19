@@ -1,5 +1,6 @@
 # TaskFlow
 
+这是我第一个vibe coding项目历时2天的空闲时间，完成了2年前自己想做却做不好的效率管理todolist
 A personal task orchestrator desktop application built with Electron + Vue 3 + Express.
 
 ## Features
