@@ -1,13 +1,10 @@
 import 'reflect-metadata'
 import { readFileSync, existsSync } from 'fs'
 import { DataSource } from 'typeorm'
-import { ActivityLog } from '../src/database/entities/ActivityLog'
 import { Board } from '../src/database/entities/Board'
-import { CalendarEvent } from '../src/database/entities/CalendarEvent'
 import { Card } from '../src/database/entities/Card'
 import { Comment } from '../src/database/entities/Comment'
 import { List } from '../src/database/entities/List'
-import { TimeBlock } from '../src/database/entities/TimeBlock'
 import { Todo } from '../src/database/entities/Todo'
 import { DailyFocusOverride } from '../src/database/entities/DailyFocusOverride'
 import { InitialSchema1710000000000 } from '../src/database/migrations/InitialSchema'
@@ -31,9 +28,6 @@ export function createDataSource() {
       Board,
       List,
       Card,
-      TimeBlock,
-      CalendarEvent,
-      ActivityLog,
       Comment,
       Todo,
       DailyFocusOverride,

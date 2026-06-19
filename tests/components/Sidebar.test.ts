@@ -14,14 +14,19 @@ jest.mock('@/stores/board', () => ({
   }),
 }))
 
-jest.mock('vue-router', () => ({
-  useRoute: () => ({
-    path: '/',
-  }),
-  useRouter: () => ({
-    push: jest.fn(),
-  }),
-}))
+const antStubs = {
+  'a-layout-sider': { template: '<aside class="sidebar"><slot /></aside>' },
+  'a-menu': { template: '<nav><slot /></nav>' },
+  'a-menu-item': { template: '<button class="nav-item"><slot /></button>' },
+  'a-badge': true,
+  'a-list': true,
+  'a-list-item': true,
+  'a-input': true,
+  'a-form': true,
+  'a-form-item': true,
+  'a-button': true,
+  'a-dropdown': true,
+}
 
 describe('Sidebar', () => {
   beforeEach(() => {
@@ -29,14 +34,21 @@ describe('Sidebar', () => {
   })
 
   it('renders sidebar component', async () => {
-    const wrapper = mount(Sidebar)
+    const wrapper = mount(Sidebar, { global: { stubs: antStubs } })
     await flushPromises()
     expect(wrapper.find('.sidebar').exists()).toBe(true)
   })
 
   it('renders logo', async () => {
-    const wrapper = mount(Sidebar)
+    const wrapper = mount(Sidebar, { global: { stubs: antStubs } })
     await flushPromises()
     expect(wrapper.find('.logo').exists()).toBe(true)
+  })
+
+  it('shows only the core board navigation entry', async () => {
+    const wrapper = mount(Sidebar, { global: { stubs: antStubs } })
+    await flushPromises()
+
+    expect(wrapper.findAll('.nav-item')).toHaveLength(1)
   })
 })

@@ -117,12 +117,6 @@
         @edit="openCardDetail"
         @delete="deleteCard"
       />
-      <CalendarView
-        v-else-if="currentView === 'calendar'"
-        :cards="filteredCards"
-        @edit="openCardDetail"
-        @update="handleCardUpdate"
-      />
     </div>
     <div v-else class="empty-state">
       <div class="empty-icon">
@@ -173,15 +167,14 @@ import { useBoardStore } from '@/stores/board'
 import { useListStore } from '@/stores/list'
 import { useCardStore } from '@/stores/card'
 import { localDateKey, useFocusStore } from '@/stores/focus'
-import { Card } from '@/database/entities/Card'
-import { Board } from '@/database/entities/Board'
+import type { Card } from '@/database/entities/Card'
+import type { Board } from '@/database/entities/Board'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CreateListModal from '@/components/board/CreateListModal.vue'
 import CardDetailModal from '@/components/board/CardDetailModal.vue'
 import SearchBar from '@/components/board/SearchBar.vue'
 import ViewSwitcher from '@/components/board/ViewSwitcher.vue'
 import ListView from '@/components/board/ListView.vue'
-import CalendarView from '@/components/board/CalendarView.vue'
 import TodayFocusBar from '@/components/board/TodayFocusBar.vue'
 
 const boardStore = useBoardStore()
@@ -346,11 +339,6 @@ function openCardDetail(card: Card) {
 
 function deleteCard(id: number) {
   cardStore.deleteCard(id)
-}
-
-async function handleCardUpdate(card: Card, newDate: string) {
-  await cardStore.updateCard(card.id, { due_date: new Date(newDate) })
-  await refreshFocus()
 }
 
 async function refreshFocus() {

@@ -6,7 +6,10 @@ files:
   - dist/**/*
   - dist-electron/**/*
   - dist-server/**/*
-  - electron/**/*
+  - package.json
+  - "!**/*.ts"
+  - "!**/*.tsx"
+  - "!**/*.map"
 win:
   target: nsis
   icon: build/icon.ico

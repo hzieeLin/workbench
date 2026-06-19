@@ -30,7 +30,13 @@ export const useBoardStore = defineStore('board', () => {
   async function updateBoard(id: number, data: Partial<Board>) {
     await apiClient.patch(`/boards/${id}`, data as Record<string, unknown>)
     const i = boards.value.findIndex((b) => b.id === id)
-    if (i !== -1) boards.value[i] = { ...boards.value[i], ...data }
+    if (i !== -1) {
+      const updatedBoard = { ...boards.value[i], ...data }
+      boards.value.splice(i, 1, updatedBoard)
+      if (currentBoard.value?.id === id) {
+        currentBoard.value = updatedBoard
+      }
+    }
   }
 
   async function deleteBoard(id: number) {

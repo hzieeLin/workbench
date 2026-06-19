@@ -52,6 +52,10 @@ onMounted(async () => {
   todos.value = todoStore.todos
 })
 
+function notifyChange() {
+  window.dispatchEvent(new CustomEvent('todos-changed', { detail: { cardId: props.cardId } }))
+}
+
 async function addTodo() {
   const text = newTodoText.value.trim()
   if (!text) return
@@ -59,16 +63,19 @@ async function addTodo() {
   await todoStore.createTodo(props.cardId, text)
   todos.value = todoStore.todos
   newTodoText.value = ''
+  notifyChange()
 }
 
 async function toggleTodo(todo: any, completed: boolean) {
   await todoStore.updateTodo(todo.id, { completed })
   todos.value = todoStore.todos
+  notifyChange()
 }
 
 async function deleteTodo(id: number) {
   await todoStore.deleteTodo(id)
   todos.value = todoStore.todos
+  notifyChange()
 }
 </script>
 

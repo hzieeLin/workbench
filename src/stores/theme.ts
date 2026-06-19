@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { theme } from 'ant-design-vue'
 
 export const useThemeStore = defineStore('theme', () => {
-  const isDark = ref(localStorage.getItem('theme') !== 'light')
+  const isDark = ref(localStorage.getItem('theme') === 'dark')
 
   function toggleTheme() {
     isDark.value = !isDark.value

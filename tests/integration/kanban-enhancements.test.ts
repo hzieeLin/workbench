@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import BoardView from '@/views/BoardView.vue'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import { useBoardStore } from '@/stores/board'
+import { localDateKey } from '@/stores/focus'
 import { apiClient } from '@/services/api'
 
 jest.mock('@/services/api', () => ({
@@ -34,7 +35,7 @@ describe('Kanban Enhancements Integration', () => {
     ;(apiClient.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes('/focus')) {
         return Promise.resolve({
-          date: '2026-06-18',
+          date: localDateKey(),
           items: [{ card: mockCard, source: 'automatic', overdue: true }],
           total: 1,
           overdueCount: 1,
@@ -82,7 +83,7 @@ describe('Kanban Enhancements Integration', () => {
     const wrapper = mount(BoardView)
     await flushPromises()
 
-    expect(apiClient.get).toHaveBeenCalledWith('/boards/1/focus?date=2026-06-18')
+    expect(apiClient.get).toHaveBeenCalledWith(`/boards/1/focus?date=${localDateKey()}`)
     expect(wrapper.text()).toContain('今日聚焦')
     expect(wrapper.text()).toContain('Test Card')
     expect(wrapper.text()).toContain('1 项逾期')
@@ -98,6 +99,6 @@ describe('Kanban Enhancements Integration', () => {
     wrapper.findComponent(BoardColumn).vm.$emit('list-changed')
     await flushPromises()
 
-    expect(apiClient.get).toHaveBeenCalledWith('/boards/1/focus?date=2026-06-18')
+    expect(apiClient.get).toHaveBeenCalledWith(`/boards/1/focus?date=${localDateKey()}`)
   })
 })

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AppstoreOutlined, UnorderedListOutlined, CalendarOutlined } from '@ant-design/icons-vue'
+import { AppstoreOutlined, UnorderedListOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
   currentView: string
@@ -22,7 +22,6 @@ const currentValue = computed({
 const viewOptions = [
   { label: '看板', value: 'board', icon: AppstoreOutlined },
   { label: '列表', value: 'list', icon: UnorderedListOutlined },
-  { label: '日历', value: 'calendar', icon: CalendarOutlined },
 ]
 
 function handleChange(val: string) {

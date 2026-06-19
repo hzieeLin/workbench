@@ -6,16 +6,16 @@ A personal task orchestrator desktop application built with Electron + Vue 3 + E
 ## Features
 
 - **Board View** - Kanban-style task management with drag-and-drop
-- **Calendar View** - Schedule and visualize tasks by date
-- **Statistics View** - Track productivity with charts and analytics
+- **List View** - Scan and manage tasks in a compact table
 - **Focus Mode** - Stay concentrated on current tasks
 - **Comments** - Add notes and comments to tasks
+- **Subtasks** - Break cards into actionable todo items
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Vue 3, TypeScript, Ant Design Vue, Chart.js |
+| Frontend | Vue 3, TypeScript, Ant Design Vue |
 | Backend | Express, TypeORM, SQLite (sql.js) |
 | Desktop | Electron |
 | Build | Vite, electron-builder |

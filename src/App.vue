@@ -1,11 +1,7 @@
 <template>
   <a-config-provider :theme="themeConfig" :locale="zhCN">
     <AppLayout>
-      <router-view v-slot="{ Component }">
-        <transition name="page" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+      <BoardView />
     </AppLayout>
   </a-config-provider>
 </template>
@@ -13,6 +9,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppLayout from './components/layout/AppLayout.vue'
+import BoardView from './views/BoardView.vue'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { useThemeStore } from './stores/theme'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
@@ -110,28 +107,6 @@ body {
 ::selection {
   background: rgba(255, 107, 74, 0.25);
   color: #ff6b4a;
-}
-
-.page-enter-active {
-  transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
-}
-
-.page-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
 }
 
 .ant-modal-content {

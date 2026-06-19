@@ -5,39 +5,20 @@
   "description": "A personal task orchestrator desktop application",
   "author": "TaskFlow Team",
   "main": "dist-electron/main.js",
-  "build": {
-    "appId": "com.taskflow.app",
-    "productName": "TaskFlow",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
-      "dist-server/**/*",
-      "electron/**/*"
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
-  },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "clean": "node scripts/clean-build.cjs dist dist-electron dist-server",
+    "build": "node scripts/clean-build.cjs dist && vue-tsc && vite build && npm run bundle:check",
     "server:dev": "nodemon --watch server --watch src/database --ext ts --exec ts-node --transpile-only --project tsconfig.server.json server/index.ts",
-    "server:build": "tsc -p tsconfig.server.json",
+    "server:build": "node scripts/clean-build.cjs dist-server && tsc -p tsconfig.server.json",
     "dev:full": "concurrently -k \"npm:server:dev\" \"npm:dev\"",
     "build:full": "npm run server:build && npm run build",
-    "build:electron": "tsc -p tsconfig.electron.json",
+    "build:electron": "node scripts/clean-build.cjs dist-electron && tsc -p tsconfig.electron.json",
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"npm:server:dev\" \"npm:dev\" \"wait-on http://localhost:5173 http://localhost:3001/api/health && cross-env NODE_ENV=development electron .\"",
+    "e2e:serve": "node scripts/clean-e2e-db.cjs && cross-env DB_PATH=.playwright-cli/e2e-data.db API_PORT=3101 concurrently -k \"ts-node --transpile-only --project tsconfig.server.json server/index.ts\" \"vite --host 127.0.0.1 --port 5174\"",
     "electron:build": "npm run server:build && npm run build:electron && npm run build && electron-builder",
+    "bundle:check": "node scripts/check-bundle-size.cjs",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "format": "prettier --write src/",
     "test": "jest",
@@ -48,18 +29,14 @@
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
     "ant-design-vue": "^4.2.6",
-    "chart.js": "^4.5.1",
     "cors": "^2.8.6",
     "dayjs": "^1.11.21",
-    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pinia": "^3.0.4",
     "reflect-metadata": "^0.2.2",
     "sql.js": "^1.14.1",
     "typeorm": "^0.3.30",
-    "vue": "^3.5.38",
-    "vue-chartjs": "^5.3.3",
-    "vue-router": "^4.6.4"
+    "vue": "^3.5.38"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

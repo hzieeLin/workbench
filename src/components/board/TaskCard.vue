@@ -60,9 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { Card } from '@/database/entities/Card'
-import { useTodoStore } from '@/stores/todo'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import type { Card } from '@/database/entities/Card'
+import { apiClient } from '@/services/api'
 
 const props = defineProps<{
   card: Card
@@ -74,14 +74,32 @@ const emit = defineEmits<{
   'toggle-focus': [cardId: number]
 }>()
 
-const todoStore = useTodoStore()
+const totalTodos = ref(0)
+const completedTodos = ref(0)
 
-onMounted(async () => {
-  await todoStore.fetchTodos(props.card.id)
+async function fetchTodoCount() {
+  try {
+    const todos = await apiClient.get<{ completed: boolean }[]>(`/cards/${props.card.id}/todos`)
+    totalTodos.value = todos.length
+    completedTodos.value = todos.filter((t) => t.completed).length
+  } catch {
+    // ignore
+  }
+}
+
+function handleTodosChanged(e: Event) {
+  const { cardId } = (e as CustomEvent).detail
+  if (cardId === props.card.id) fetchTodoCount()
+}
+
+onMounted(() => {
+  fetchTodoCount()
+  window.addEventListener('todos-changed', handleTodosChanged)
 })
 
-const totalTodos = computed(() => todoStore.todos.length)
-const completedTodos = computed(() => todoStore.todos.filter((t) => t.completed).length)
+onUnmounted(() => {
+  window.removeEventListener('todos-changed', handleTodosChanged)
+})
 
 const priorityText = computed(() => {
   const map: Record<string, string> = { low: '低', medium: '中', high: '高' }

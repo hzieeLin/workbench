@@ -5,18 +5,10 @@
       <h1>TaskFlow</h1>
     </div>
 
-    <a-menu mode="inline" :selected-keys="selectedKeys" class="nav-menu">
-      <a-menu-item key="/" @click="$router.push('/')">
+    <a-menu mode="inline" :selected-keys="['/']" class="nav-menu">
+      <a-menu-item key="/">
         <template #icon><AppstoreOutlined /></template>
         看板
-      </a-menu-item>
-      <a-menu-item key="/calendar" @click="$router.push('/calendar')">
-        <template #icon><CalendarOutlined /></template>
-        时间规划
-      </a-menu-item>
-      <a-menu-item key="/statistics" @click="$router.push('/statistics')">
-        <template #icon><BarChartOutlined /></template>
-        统计分析
       </a-menu-item>
     </a-menu>
 
@@ -82,18 +74,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
-import { Board } from '@/database/entities/Board'
-import {
-  AppstoreOutlined,
-  CalendarOutlined,
-  BarChartOutlined,
-  PlusOutlined,
-} from '@ant-design/icons-vue'
+import type { Board } from '@/database/entities/Board'
+import { AppstoreOutlined, PlusOutlined } from '@ant-design/icons-vue'
 
-const route = useRoute()
-const router = useRouter()
 const boardStore = useBoardStore()
 const boards = computed(() => boardStore.boards)
 const showCreateBoard = ref(false)
@@ -101,12 +85,6 @@ const newBoardName = ref('')
 
 const editingBoardId = ref<number | null>(null)
 const editingName = ref('')
-
-const selectedKeys = computed(() => {
-  if (route.path === '/calendar') return ['/calendar']
-  if (route.path === '/statistics') return ['/statistics']
-  return ['/']
-})
 
 function startEdit(board: Board) {
   editingBoardId.value = board.id
@@ -141,16 +119,8 @@ onMounted(async () => {
 })
 
 function selectBoard(board: Board) {
-  if (boardStore.currentBoard?.id === board.id) {
-    if (route.path !== '/') {
-      router.push('/')
-    }
-    return
-  }
+  if (boardStore.currentBoard?.id === board.id) return
   boardStore.setCurrentBoard(board)
-  if (route.path !== '/') {
-    router.push('/')
-  }
 }
 
 function openContextMenu(_e: MouseEvent, board: Board) {

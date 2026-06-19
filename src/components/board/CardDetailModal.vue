@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Card } from '@/database/entities/Card'
+import type { Card } from '@/database/entities/Card'
 import { useCardStore } from '@/stores/card'
 import CommentSection from './CommentSection.vue'
 import TodoList from './TodoList.vue'

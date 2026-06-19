@@ -74,8 +74,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { List } from '@/database/entities/List'
-import { Card } from '@/database/entities/Card'
+import type { List } from '@/database/entities/List'
+import type { Card } from '@/database/entities/Card'
 import { useCardStore } from '@/stores/card'
 import { useListStore } from '@/stores/list'
 import TaskCard from './TaskCard.vue'
